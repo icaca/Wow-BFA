@@ -368,9 +368,12 @@ function UF:CreateIcons(self)
 		self.QuestIndicator = quest
 	end
 
-	local phase = self:CreateTexture(nil, "OVERLAY")
-	phase:SetPoint("TOP", self, 0, 12)
-	phase:SetSize(22, 22)
+	local parentFrame = CreateFrame("Frame", nil, self)
+	parentFrame:SetAllPoints()
+	parentFrame:SetFrameLevel(5)
+	local phase = parentFrame:CreateTexture(nil, "OVERLAY")
+	phase:SetPoint("CENTER", self.Health)
+	phase:SetSize(24, 24)
 	self.PhaseIndicator = phase
 
 	local ri = self:CreateTexture(nil, "OVERLAY")
@@ -404,9 +407,9 @@ function UF:CreateRaidMark(self)
 		ri:SetPoint("RIGHT", self, "LEFT", -3, 0)
 		ri:SetParent(self.Health)
 	else
-		ri:SetPoint("TOPRIGHT", self, "TOPRIGHT", -30, 10)
+		ri:SetPoint("CENTER", self, "TOP")
 	end
-	local size = retVal(self, 14, 13, 12, 12, 32)
+	local size = retVal(self, 18, 13, 12, 12, 32)
 	ri:SetSize(size, size)
 	self.RaidTargetIndicator = ri
 end
@@ -428,12 +431,15 @@ function UF:CreateCastBar(self)
 	B.CreateSB(cb, true, .3, .7, 1)
 
 	if mystyle == "player" then
+		cb:SetFrameLevel(10)
 		cb:SetSize(NDuiDB["UFs"]["PlayerCBWidth"], NDuiDB["UFs"]["PlayerCBHeight"])
 		createBarMover(cb, L["Player Castbar"], "PlayerCB", C.UFs.Playercb)
 	elseif mystyle == "target" then
+		cb:SetFrameLevel(10)
 		cb:SetSize(NDuiDB["UFs"]["TargetCBWidth"], NDuiDB["UFs"]["TargetCBHeight"])
 		createBarMover(cb, L["Target Castbar"], "TargetCB", C.UFs.Targetcb)
 	elseif mystyle == "focus" then
+		cb:SetFrameLevel(10)
 		cb:SetSize(NDuiDB["UFs"]["FocusCBWidth"], NDuiDB["UFs"]["FocusCBHeight"])
 		createBarMover(cb, L["Focus Castbar"], "FocusCB", C.UFs.Focuscb)
 	elseif mystyle == "boss" or mystyle == "arena" then
@@ -837,18 +843,17 @@ function UF.PostUpdateClassPower(element, cur, max, diff, powerType)
 		end
 	end
 
-	if NDuiDB["Nameplate"]["ShowPlayerPlate"] and NDuiDB["Nameplate"]["MaxPowerGlow"] then
-		if (powerType == "COMBO_POINTS" or powerType == "HOLY_POWER") and element.__owner.unit ~= "vehicle" and cur == max then
-			for i = 1, 6 do
-				if element[i]:IsShown() then
-					B.ShowOverlayGlow(element[i].glow)
-				end
-			end
-		else
-			for i = 1, 6 do
-				B.HideOverlayGlow(element[i].glow)
-			end
+	element.thisColor = cur == max and 1 or 2
+	if not element.prevColor or element.prevColor ~= element.thisColor then
+		local r, g, b = 1, 0, 0
+		if element.thisColor == 2 then
+			local color = element.__owner.colors.power[powerType]
+			r, g, b = color[1], color[2], color[3]
 		end
+		for i = 1, #element do
+			element[i]:SetStatusBarColor(r, g, b)
+		end
+		element.prevColor = element.thisColor
 	end
 end
 
@@ -918,18 +923,13 @@ function UF:CreateClassPower(self)
 		if DB.MyClass == "DEATHKNIGHT" and NDuiDB["UFs"]["RuneTimer"] then
 			bars[i].timer = B.CreateFS(bars[i], 13, "")
 		end
-
-		if NDuiDB["Nameplate"]["ShowPlayerPlate"] then
-			bars[i].glow = CreateFrame("Frame", nil, bars[i])
-			bars[i].glow:SetPoint("TOPLEFT", -3, 2)
-			bars[i].glow:SetPoint("BOTTOMRIGHT", 3, -2)
-		end
 	end
 
 	if DB.MyClass == "DEATHKNIGHT" then
 		bars.colorSpec = true
 		bars.sortOrder = "asc"
 		bars.PostUpdate = UF.PostUpdateRunes
+		bars.__max = 6
 		self.Runes = bars
 	else
 		bars.PostUpdate = UF.PostUpdateClassPower
