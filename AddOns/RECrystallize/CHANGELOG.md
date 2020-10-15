@@ -1,7 +1,8 @@
 # RECrystallize
 
-## [v1.7.1](https://github.com/AcidWeb/RECrystallize/tree/v1.7.1) (2020-06-01)
-[Full Changelog](https://github.com/AcidWeb/RECrystallize/compare/v1.7.0...v1.7.1)
+## [v1.8.0](https://github.com/AcidWeb/RECrystallize/tree/v1.8.0) (2020-10-14)
+[Full Changelog](https://github.com/AcidWeb/RECrystallize/compare/v1.7.1...v1.8.0) [Previous Releases](https://github.com/AcidWeb/RECrystallize/releases)
 
-- Version bump  
-- Fixed ending scan if all items are ready at the beginning (#1)  
+- TOC bump  
+- Preliminary SL update  
+- Removed ElvUI swag  
