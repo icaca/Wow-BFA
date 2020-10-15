@@ -103,8 +103,10 @@ function Crafting.OnInitialize()
 			professionItems[craftInfo.profession] = professionItems[craftInfo.profession] or TempTable.Acquire()
 			professionItems[craftInfo.profession][matItemString] = true
 			matSpellCount[spellId] = (matSpellCount[spellId] or 0) + 1
-			matFirstItemString[spellId] = matItemString
-			matFirstQuantity[spellId] = matQuantity
+			if matQuantity > 0 then
+				matFirstItemString[spellId] = matItemString
+				matFirstQuantity[spellId] = matQuantity
+			end
 		end
 	end
 	TempTable.Release(playersTemp)
@@ -114,10 +116,12 @@ function Crafting.OnInitialize()
 	private.matDBMatsInTableQuery = private.matDB:NewQuery()
 		:Select("itemString", "quantity")
 		:Equal("spellId", Database.BoundQueryParam())
+		:GreaterThan("quantity", 0)
 	private.matDBMatNamesQuery = private.matDB:NewQuery()
 		:Select("name")
 		:InnerJoin(ItemInfo.GetDBForJoin(), "itemString")
 		:Equal("spellId", Database.BoundQueryParam())
+		:GreaterThan("quantity", 0)
 
 	private.matItemDB = Database.NewSchema("CRAFTING_MAT_ITEMS")
 		:AddUniqueStringField("itemString")
@@ -149,18 +153,23 @@ function Crafting.OnInitialize()
 		:Equal("spellId", Database.BoundQueryParam())
 
 	-- register 1:1 crafting conversions
+	local addedConversion = false
 	local query = private.spellDB:NewQuery()
 		:Select("spellId", "itemString", "numResult")
 		:Equal("hasCD", false)
 	for _, spellId, itemString, numResult in query:Iterator() do
 		if not ProfessionInfo.IsMassMill(spellId) and matSpellCount[spellId] == 1 then
 			Conversions.AddCraft(itemString, matFirstItemString[spellId], numResult / matFirstQuantity[spellId])
+			addedConversion = true
 		end
 	end
 	query:Release()
 	TempTable.Release(matSpellCount)
 	TempTable.Release(matFirstItemString)
 	TempTable.Release(matFirstQuantity)
+	if addedConversion then
+		CustomPrice.OnSourceChange("Destroy")
+	end
 
 	local isValid, err = CustomPrice.Validate(TSM.db.global.craftingOptions.defaultCraftPriceMethod, BAD_CRAFTING_PRICE_SOURCES)
 	if not isValid then
@@ -223,7 +232,7 @@ function Crafting.CreateMatItemQuery()
 	return private.matItemDB:NewQuery()
 		:InnerJoin(ItemInfo.GetDBForJoin(), "itemString")
 		:VirtualField("matCost", "number", private.MatCostVirtualField, "itemString")
-		:VirtualField("totalQuantity", "number", Inventory.GetTotalQuantity, "itemString")
+		:VirtualField("totalQuantity", "number", private.GetTotalQuantity, "itemString")
 end
 
 function Crafting.SpellIterator()
@@ -304,6 +313,18 @@ function Crafting.MatIterator(spellId)
 	return private.matDB:NewQuery()
 		:Select("itemString", "quantity")
 		:Equal("spellId", spellId)
+		:GreaterThan("quantity", 0)
+		:IteratorAndRelease()
+end
+
+function Crafting.GetOptionalMatIterator(spellId)
+	return private.matDB:NewQuery()
+		:Select("itemString", "slotId", "text")
+		:VirtualField("slotId", "number", private.OptionalMatSlotIdVirtualField, "itemString")
+		:VirtualField("text", "string", private.OptionalMatTextVirtualField, "itemString")
+		:Equal("spellId", spellId)
+		:LessThan("quantity", 0)
+		:OrderBy("slotId", true)
 		:IteratorAndRelease()
 end
 
@@ -512,23 +533,13 @@ function Crafting.SetMats(spellId, matQuantities)
 				:SetField("itemString", itemString)
 				:SetField("quantity", quantity)
 				:Create()
-			local matItemRow = private.matItemDB:GetUniqueRow("itemString", itemString)
-			if matItemRow then
-				-- update the professions if necessary
-				local professions = TempTable.Acquire(strsplit(PROFESSION_SEP, matItemRow:GetField("professions")))
-				if not Table.KeyByValue(professions, profession) then
-					tinsert(professions, profession)
-					sort(professions)
-					matItemRow:SetField("professions", table.concat(professions, PROFESSION_SEP))
-						:Update()
-				end
-				TempTable.Release(professions)
+			if quantity > 0 then
+				private.MatItemDBUpdateOrInsert(itemString, profession)
 			else
-				private.matItemDB:NewRow()
-					:SetField("itemString", itemString)
-					:SetField("professions", profession)
-					:SetField("customValue", TSM.db.factionrealm.internalData.mats[itemString].customValue or "")
-					:Create()
+				local _, _, matList = strsplit(":", itemString)
+				for matItemId in String.SplitIterator(matList, ",") do
+					private.MatItemDBUpdateOrInsert("i:"..matItemId, profession)
+				end
 			end
 		end
 	end
@@ -645,6 +656,16 @@ function private.MatCostVirtualField(itemString)
 	return TSM.Crafting.Cost.GetMatCost(itemString) or Math.GetNan()
 end
 
+function private.OptionalMatSlotIdVirtualField(matStr)
+	local _, slotId = strsplit(":", matStr)
+	return tonumber(slotId)
+end
+
+function private.OptionalMatTextVirtualField(matStr)
+	local _, _, matList = strsplit(":", matStr)
+	return TSM.Crafting.ProfessionUtil.GetOptionalMatText(matList) or OPTIONAL_REAGENT_POSTFIX
+end
+
 function private.GetRestockHelpMessage(itemString)
 	-- check if the item is in a group
 	local groupPath = TSM.Groups.GetPathByItem(itemString)
@@ -669,7 +690,7 @@ function private.GetRestockHelpMessage(itemString)
 	end
 
 	-- check the restock quantity
-	local neededQuantity = TSM.Operations.Crafting.GetRestockQuantity(itemString, Inventory.GetTotalQuantity(itemString))
+	local neededQuantity = TSM.Operations.Crafting.GetRestockQuantity(itemString, private.GetTotalQuantity(itemString))
 	if neededQuantity == 0 then
 		return L["You either already have at least your max restock quantity of this item or the number which would be queued is less than the min restock quantity."]
 	end
@@ -714,4 +735,29 @@ end
 
 function private.QueryPlayerFilter(row, player)
 	return String.SeparatedContains(row:GetField("players"), ",", player)
+end
+
+function private.GetTotalQuantity(itemString)
+	return CustomPrice.GetItemPrice(itemString, "NumInventory") or 0
+end
+
+function private.MatItemDBUpdateOrInsert(itemString, profession)
+	local matItemRow = private.matItemDB:GetUniqueRow("itemString", itemString)
+	if matItemRow then
+		-- update the professions if necessary
+		local professions = TempTable.Acquire(strsplit(PROFESSION_SEP, matItemRow:GetField("professions")))
+		if not Table.KeyByValue(professions, profession) then
+			tinsert(professions, profession)
+			sort(professions)
+			matItemRow:SetField("professions", table.concat(professions, PROFESSION_SEP))
+				:Update()
+		end
+		TempTable.Release(professions)
+	else
+		private.matItemDB:NewRow()
+			:SetField("itemString", itemString)
+			:SetField("professions", profession)
+			:SetField("customValue", TSM.db.factionrealm.internalData.mats[itemString].customValue or "")
+			:Create()
+	end
 end

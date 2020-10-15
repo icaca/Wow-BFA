@@ -15,6 +15,7 @@ local ItemString = TSM.Include("Util.ItemString")
 local ItemInfo = TSM.Include("Service.ItemInfo")
 local BagTracking = TSM.Include("Service.BagTracking")
 local Inventory = TSM.Include("Service.Inventory")
+local CustomPrice = TSM.Include("Service.CustomPrice")
 local private = {
 	craftQuantity = nil,
 	craftSpellId = nil,
@@ -130,7 +131,7 @@ function ProfessionUtil.GetNumCraftable(spellId)
 	for i = 1, ProfessionUtil.GetNumMats(spellId) do
 		local matItemLink, _, _, quantity = ProfessionUtil.GetMatInfo(spellId, i)
 		local itemString = ItemString.Get(matItemLink)
-		local totalQuantity = Inventory.GetTotalQuantity(itemString)
+		local totalQuantity = CustomPrice.GetItemPrice(itemString, "NumInventory") or 0
 		if not itemString or not quantity or totalQuantity == 0 then
 			return 0, 0
 		end
@@ -188,10 +189,17 @@ function ProfessionUtil.IsEnchant(spellId)
 	if not strfind(C_TradeSkillUI.GetRecipeItemLink(spellId), "enchant:") then
 		return false
 	end
-	local recipeInfo = TempTable.Acquire()
-	assert(C_TradeSkillUI.GetRecipeInfo(spellId, recipeInfo) == recipeInfo)
+	local recipeInfo = nil
+	if not TSM.IsShadowlands() then
+		recipeInfo = TempTable.Acquire()
+		assert(C_TradeSkillUI.GetRecipeInfo(spellId, recipeInfo) == recipeInfo)
+	else
+		recipeInfo = C_TradeSkillUI.GetRecipeInfo(spellId)
+	end
 	local altVerb = recipeInfo.alternateVerb
-	TempTable.Release(recipeInfo)
+	if not TSM.IsShadowlands() then
+		TempTable.Release(recipeInfo)
+	end
 	return altVerb and true or false
 end
 
@@ -390,6 +398,14 @@ function ProfessionUtil.GetCategoryInfo(categoryId)
 		wipe(private.categoryInfoTemp)
 	end
 	return name, numIndents, parentCategoryId, currentSkillLevel, maxSkillLevel
+end
+
+function ProfessionUtil.StoreOptionalMatText(matList, text)
+	TSM.db.global.internalData.optionalMatTextLookup[matList] = TSM.db.global.internalData.optionalMatTextLookup[matList] or text
+end
+
+function ProfessionUtil.GetOptionalMatText(matList)
+	return TSM.db.global.internalData.optionalMatTextLookup[matList]
 end
 
 

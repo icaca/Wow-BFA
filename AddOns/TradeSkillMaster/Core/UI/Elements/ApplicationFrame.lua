@@ -134,7 +134,7 @@ end
 -- @treturn ApplicationFrame The application frame object
 function ApplicationFrame.AddPlayerGold(self)
 	local titleFrame = self:GetElement("titleFrame")
-	titleFrame:AddChildBeforeById(titleFrame:GetElement("switchBtn") and "switchBtn" or "closeBtn", UIElements.New("PlayerGoldText", "playerGold")
+	titleFrame:AddChildBeforeById(titleFrame:HasChildById("switchBtn") and "switchBtn" or "closeBtn", UIElements.New("PlayerGoldText", "playerGold")
 		:SetWidth("AUTO")
 		:SetMargin(0, 8, 0, 0)
 	)
@@ -624,8 +624,8 @@ end
 
 function private.MenuDialogRowDefaultOnEnter(button)
 	local frame = button:GetParentElement():GetParentElement()
-	local subFrame = frame:GetElement("subFrame")
-	if subFrame then
+	if frame:HasChildById("subFrame") then
+		local subFrame = frame:GetElement("subFrame")
 		local prevRow = frame:GetContext()
 		frame:SetContext(nil)
 		if prevRow then
