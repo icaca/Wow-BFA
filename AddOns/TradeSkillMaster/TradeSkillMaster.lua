@@ -218,6 +218,8 @@ function TSM.OnInitialize()
 	if TSM.IsWowClassic() then
 		SlashCommands.Register("scan", TSM.AuctionDB.RunScan, L["Performs a full, manual scan of the AH to populate some AuctionDB data if none is otherwise available."])
 	end
+	SlashCommands.Register("qscan", TSM.AuctionDB.RunQuickScan, L["快速扫描最低价作为市场价,有一定误差."])
+	
 
 	-- create / register the minimap button
 	local dataObj = LibStub("LibDataBroker-1.1"):NewDataObject("TradeSkillMaster", {
