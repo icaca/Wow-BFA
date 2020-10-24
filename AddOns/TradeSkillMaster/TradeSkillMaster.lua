@@ -37,7 +37,7 @@ local APP_INFO_REQUIRED_KEYS = { "version", "lastSync", "message", "news" }
 local LOGOUT_TIME_WARNING_THRESHOLD_MS = 20
 do
 	-- show a message if we were updated
-	if GetAddOnMetadata("TradeSkillMaster", "Version") ~= "v4.10.9" then
+	if GetAddOnMetadata("TradeSkillMaster", "Version") ~= "v4.10.13" then
 		Wow.ShowBasicMessage("TSM was just updated and may not work properly until you restart WoW.")
 	end
 end
@@ -218,8 +218,6 @@ function TSM.OnInitialize()
 	if TSM.IsWowClassic() then
 		SlashCommands.Register("scan", TSM.AuctionDB.RunScan, L["Performs a full, manual scan of the AH to populate some AuctionDB data if none is otherwise available."])
 	end
-	SlashCommands.Register("qscan", TSM.AuctionDB.RunQuickScan, L["快速扫描最低价作为市场价,有一定误差."])
-	
 
 	-- create / register the minimap button
 	local dataObj = LibStub("LibDataBroker-1.1"):NewDataObject("TradeSkillMaster", {
