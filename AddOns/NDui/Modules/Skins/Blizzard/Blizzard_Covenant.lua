@@ -94,9 +94,11 @@ end
 C.themes["Blizzard_CovenantSanctum"] = function()
 	local CovenantSanctumFrame = CovenantSanctumFrame
 
-	B.ReskinTab(CovenantSanctumFrameTab1)
-	B.ReskinTab(CovenantSanctumFrameTab2)
-	CovenantSanctumFrameTab1:SetPoint("TOPLEFT", CovenantSanctumFrame, "BOTTOMLEFT", 23, 1)
+	if not DB.isNewPatch then
+		B.ReskinTab(CovenantSanctumFrameTab1)
+		B.ReskinTab(CovenantSanctumFrameTab2)
+		CovenantSanctumFrameTab1:SetPoint("TOPLEFT", CovenantSanctumFrame, "BOTTOMLEFT", 23, 1)
+	end
 
 	CovenantSanctumFrame:HookScript("OnShow", function(self)
 		if not self.bg then
@@ -105,28 +107,52 @@ C.themes["Blizzard_CovenantSanctum"] = function()
 			self.LevelFrame.Background:SetAlpha(0)
 			B.ReskinClose(self.CloseButton)
 			self.CloseButton.Border:SetAlpha(0)
+		end
+	end)
 
-			local upgradesTab = self.UpgradesTab
-			upgradesTab.Background:SetAlpha(0)
-			B.CreateBDFrame(upgradesTab.Background, .25)
-			B.Reskin(upgradesTab.DepositButton)
-			for _, frame in ipairs(upgradesTab.Upgrades) do
-				if frame.TierBorder then
-					frame.TierBorder:SetAlpha(0)
-				end
+	local upgradesTab = CovenantSanctumFrame.UpgradesTab
+	upgradesTab.Background:SetAlpha(0)
+	B.CreateBDFrame(upgradesTab.Background, .25)
+	B.Reskin(upgradesTab.DepositButton)
+	for _, frame in ipairs(upgradesTab.Upgrades) do
+		if frame.TierBorder then
+			frame.TierBorder:SetAlpha(0)
+		end
+	end
+	upgradesTab.CurrencyBackground:SetAlpha(0)
+	replaceCurrencies(upgradesTab.CurrencyDisplayGroup)
+
+	local talentsList = upgradesTab.TalentsList
+	talentsList.Divider:SetAlpha(0)
+	B.CreateBDFrame(talentsList, .25)
+	talentsList.BackgroundTile:SetAlpha(0)
+	talentsList.IntroBox.Background:Hide()
+	B.Reskin(talentsList.UpgradeButton)
+	hooksecurefunc(talentsList, "Refresh", reskinTalentsList)
+
+	if not DB.isNewPatch then
+		hooksecurefunc(self.RenownTab, "Refresh", hideRenownLevelBorder)
+	end
+end
+
+-- Covenant renown
+C.themes["Blizzard_CovenantRenown"] = function()
+	local CovenantRenownFrame = CovenantRenownFrame
+
+	B.SetBD(CovenantRenownFrame)
+	B.ReskinClose(CovenantRenownFrame.CloseButton)
+
+	hooksecurefunc(CovenantRenownFrame, "SetUpTextureKits", function(self)
+		B.StripTextures(self)
+		self.CloseButton.Border:Hide()
+	end)
+
+	hooksecurefunc(CovenantRenownFrame.TrackFrame, "Init", function(self)
+		for _, element in next, self.Elements do
+			if not element.styled then
+				element.LevelBorder:SetAlpha(0)
+				element.styled = true
 			end
-			upgradesTab.CurrencyBackground:SetAlpha(0)
-			replaceCurrencies(upgradesTab.CurrencyDisplayGroup)
-
-			local talentsList = upgradesTab.TalentsList
-			talentsList.Divider:SetAlpha(0)
-			B.CreateBDFrame(talentsList, .25)
-			talentsList.BackgroundTile:SetAlpha(0)
-			talentsList.IntroBox.Background:Hide()
-			B.Reskin(talentsList.UpgradeButton)
-			hooksecurefunc(talentsList, "Refresh", reskinTalentsList)
-
-			hooksecurefunc(self.RenownTab, "Refresh", hideRenownLevelBorder)
 		end
 	end)
 end

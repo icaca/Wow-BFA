@@ -57,6 +57,7 @@ G.DefaultSettings = {
 		SplitCount = 1,
 		SpecialBagsColor = false,
 		iLvlToShow = 1,
+		AutoDeposit = false,
 
 		FilterJunk = true,
 		FilterConsumable = true,
@@ -120,6 +121,7 @@ G.DefaultSettings = {
 		HotsDots = true,
 		AutoAttack = true,
 		FCTOverHealing = false,
+		FCTFontSize = 18,
 		PetCombatText = true,
 		RaidClickSets = false,
 		ShowTeamIndex = false,
@@ -196,10 +198,11 @@ G.DefaultSettings = {
 		ChatBGType = 2,
 	},
 	Map = {
-		Coord = true,
+		DisableMap = false,
 		Clock = false,
 		CombatPulse = true,
 		MapScale = 1,
+		MaxMapScale = 1,
 		MinimapScale = 1.4,
 		ShowRecycleBin = true,
 		WhoPings = true,
@@ -216,7 +219,6 @@ G.DefaultSettings = {
 		TankMode = false,
 		TargetIndicator = 5,
 		InsideView = true,
-		--Distance = 42,
 		PlateWidth = 190,
 		PlateHeight = 8,
 		CustomUnitColor = true,
@@ -249,6 +251,7 @@ G.DefaultSettings = {
 		QuestIndicator = true,
 		NameOnlyMode = false,
 		PPGCDTicker = true,
+		ExecuteRatio = 0,
 	},
 	Skins = {
 		DBM = true,
@@ -288,8 +291,9 @@ G.DefaultSettings = {
 		HideRealm = false,
 		HideTitle = false,
 		HideJunkGuild = true,
-		AzeriteArmor = false,
+		AzeriteArmor = true,
 		OnlyArmorIcons = false,
+		ConduitInfo = true,
 	},
 	Misc = {
 		Mail = true,
@@ -486,6 +490,15 @@ local function updateCustomBar()
 	B:GetModule("Actionbar"):UpdateCustomBar()
 end
 
+local function updateHotkeys()
+	local Bar = B:GetModule("Actionbar")
+	for _, button in pairs(Bar.buttons) do
+		if button.UpdateHotkeys then
+			button:UpdateHotkeys(button.buttonType)
+		end
+	end
+end
+
 local function updateBuffFrame()
 	local A = B:GetModule("Auras")
 	A:UpdateOptions()
@@ -543,10 +556,6 @@ end
 
 local function updatePlateSpacing()
 	B:GetModule("UnitFrames"):UpdatePlateSpacing()
-end
-
-local function updatePlateRange()
-	B:GetModule("UnitFrames"):UpdatePlateRange()
 end
 
 local function updateCustomUnitList()
@@ -734,7 +743,7 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{1, "Actionbar", "DecimalCD", L["Decimal Cooldown"].."*"},
 		{1, "Actionbar", "OverrideWA", L["HideCooldownOnWA"].."*", true},
 		{},--blank
-		{1, "Actionbar", "Hotkeys", L["Actionbar Hotkey"]},
+		{1, "Actionbar", "Hotkeys", L["Actionbar Hotkey"].."*", nil, nil, updateHotkeys},
 		{1, "Actionbar", "Macro", L["Actionbar Macro"], true},
 		{1, "Actionbar", "Count", L["Actionbar Item Counts"]},
 		{1, "Actionbar", "Classcolor", L["ClassColor BG"], true},
@@ -778,10 +787,11 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{3, "UFs", "SmoothAmount", "|cff00cc4c"..L["SmoothAmount"].."*", true, {.15, .6, .05}, updateSmoothingAmount, L["SmoothAmountTip"]},
 		{},--blank
 		{1, "UFs", "CombatText", "|cff00cc4c"..L["UFs CombatText"]},
-		{1, "UFs", "AutoAttack", L["CombatText AutoAttack"]},
-		{1, "UFs", "PetCombatText", L["CombatText ShowPets"], true},
-		{1, "UFs", "HotsDots", L["CombatText HotsDots"]},
-		{1, "UFs", "FCTOverHealing", L["CombatText OverHealing"], true},
+		{1, "UFs", "AutoAttack", L["CombatText AutoAttack"].."*"},
+		{1, "UFs", "PetCombatText", L["CombatText ShowPets"].."*", true},
+		{1, "UFs", "HotsDots", L["CombatText HotsDots"].."*"},
+		{1, "UFs", "FCTOverHealing", L["CombatText OverHealing"].."*"},
+		{3, "UFs", "FCTFontSize", L["FCTFontSize"].."*", true, {12, 40, 1}},
 	},
 	[4] = {
 		{1, "UFs", "RaidFrame", "|cff00cc4c"..L["UFs RaidFrame"], nil, setupRaidFrame, nil, L["RaidFrameTip"]},
@@ -847,8 +857,8 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{5, "Nameplate", "InsecureColor", L["Insecure Color"].."*", 2},
 		{5, "Nameplate", "OffTankColor", L["OffTank Color"].."*", 3},
 		{},--blank
-		{3, "Nameplate", "VerticalSpacing", L["NP VerticalSpacing"].."*", false, {.5, 1.5, .1}, updatePlateSpacing},
-		--{3, "Nameplate", "Distance", L["Nameplate Distance"].."*", true, {20, 100, 1}, updatePlateRange}, -- hide until blizz re-enable it
+		{3, "Nameplate", "ExecuteRatio", "|cffff0000"..L["ExecuteRatio"].."*", nil, {0, 90, 1}, nil, L["ExecuteRatioTip"]},
+		{3, "Nameplate", "VerticalSpacing", L["NP VerticalSpacing"].."*", true, {.5, 1.5, .1}, updatePlateSpacing},
 		{3, "Nameplate", "MinScale", L["Nameplate MinScale"].."*", false, {.5, 1, .1}, updatePlateScale},
 		{3, "Nameplate", "MinAlpha", L["Nameplate MinAlpha"].."*", true, {.5, 1, .1}, updatePlateAlpha},
 		{3, "Nameplate", "PlateWidth", L["NP Width"].."*", false, {50, 250, 1}, refreshNameplates},
@@ -945,16 +955,16 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{2, "Chat", "Keyword", L["Whisper Keyword"].."*", true, nil, updateWhisperList},
 	},
 	[10] = {
-		{1, "Map", "Coord", L["Map Coords"]},
+		{1, "Map", "DisableMap", "|cffff0000"..L["DisableMap"], nil, nil, nil, L["DisableMapTip"]},
+		{3, "Map", "MapScale", L["Map Scale"].."*", false, {.8, 2, .1}},
+		{3, "Map", "MaxMapScale", L["Maximize Map Scale"].."*", true, {.5, 1, .1}},
 		{},--blank
 		{1, "Map", "Calendar", L["MinimapCalendar"].."*", nil, nil, showCalendar, L["MinimapCalendarTip"]},
 		{1, "Map", "Clock", L["Minimap Clock"].."*", true, nil, showMinimapClock},
 		{1, "Map", "CombatPulse", L["Minimap Pulse"]},
 		{1, "Map", "WhoPings", L["Show WhoPings"], true},
 		{1, "Map", "ShowRecycleBin", L["Show RecycleBin"]},
-		{1, "Misc", "ExpRep", L["Show Expbar"], true},
-		{},--blank
-		{3, "Map", "MapScale", L["Map Scale"], false, {1, 2, .1}},
+		{1, "Misc", "ExpRep", L["Show Expbar"]},
 		{3, "Map", "MinimapScale", L["Minimap Scale"].."*", true, {1, 2, .1}, updateMinimapScale},
 	},
 	[11] = {
@@ -1001,6 +1011,7 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{},--blank
 		{1, "Tooltip", "AzeriteArmor", "|cff00cc4c"..L["Show AzeriteArmor"]},
 		{1, "Tooltip", "OnlyArmorIcons", L["Armor icons only"].."*", true},
+		{1, "Tooltip", "ConduitInfo", "|cff00cc4c"..L["Show ConduitInfo"]},
 	},
 	[13] = {
 		{1, "Misc", "ItemLevel", "|cff00cc4c"..L["Show ItemLevel"]},

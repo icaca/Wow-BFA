@@ -11,6 +11,7 @@ local GetContainerNumSlots, GetContainerItemInfo, PickupContainerItem = GetConta
 local C_NewItems_IsNewItem, C_NewItems_RemoveNewItem, C_Timer_After = C_NewItems.IsNewItem, C_NewItems.RemoveNewItem, C_Timer.After
 local C_AzeriteEmpoweredItem_IsAzeriteEmpoweredItemByID = C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID
 local C_Soulbinds_IsItemConduitByItemInfo = C_Soulbinds.IsItemConduitByItemInfo
+local IsCosmeticItem = IsCosmeticItem
 local IsControlKeyDown, IsAltKeyDown, DeleteCursorItem = IsControlKeyDown, IsAltKeyDown, DeleteCursorItem
 local GetItemInfo, GetContainerItemID, SplitContainerItem = GetItemInfo, GetContainerItemID, SplitContainerItem
 
@@ -154,12 +155,35 @@ function module:CreateBankButton(f)
 	return bu
 end
 
+local function updateDepositButtonStatus(bu)
+	if NDuiDB["Bags"]["AutoDeposit"] then
+		bu.bg:SetBackdropBorderColor(1, .8, 0)
+	else
+		bu.bg:SetBackdropBorderColor(0, 0, 0)
+	end
+end
+
+function module:AutoDeposit()
+	if NDuiDB["Bags"]["AutoDeposit"] then
+		DepositReagentBank()
+	end
+end
+
 function module:CreateDepositButton()
 	local bu = B.CreateButton(self, 24, 24, true, "Atlas:GreenCross")
 	bu.Icon:SetOutside()
-	bu:SetScript("OnClick", DepositReagentBank)
+	bu:RegisterForClicks("AnyUp")
+	bu:SetScript("OnClick", function(_, btn)
+		if btn == "RightButton" then
+			NDuiDB["Bags"]["AutoDeposit"] = not NDuiDB["Bags"]["AutoDeposit"]
+			updateDepositButtonStatus(bu)
+		else
+			DepositReagentBank()
+		end
+	end)
 	bu.title = REAGENTBANK_DEPOSIT
-	B.AddTooltip(bu, "ANCHOR_TOP")
+	B.AddTooltip(bu, "ANCHOR_TOP", DB.InfoColor..L["AutoDepositTip"])
+	updateDepositButtonStatus(bu)
 
 	return bu
 end
@@ -411,6 +435,15 @@ local function favouriteOnClick(self)
 	end
 end
 
+StaticPopupDialogs["NDUI_WIPE_JUNK_LIST"] = {
+	text = L["Reset junklist warning"],
+	button1 = YES,
+	button2 = NO,
+	OnAccept = function()
+		wipe(NDuiADB["CustomJunkList"])
+	end,
+	whileDead = 1,
+}
 local customJunkEnable
 function module:CreateJunkButton()
 	local enabledText = DB.InfoColor..L["JunkMode Enabled"]
@@ -424,6 +457,11 @@ function module:CreateJunkButton()
 		customJunkEnable = nil
 	end
 	bu:SetScript("OnClick", function(self)
+		if IsAltKeyDown() and IsControlKeyDown() then
+			StaticPopup_Show("NDUI_WIPE_JUNK_LIST")
+			return
+		end
+
 		module:SelectToggleButton(3)
 		customJunkEnable = not customJunkEnable
 		if customJunkEnable then
@@ -702,20 +740,17 @@ function module:OnLogin()
 
 	local function GetIconOverlayAtlas(item)
 		if not item.link then return end
+
 		if C_AzeriteEmpoweredItem_IsAzeriteEmpoweredItemByID(item.link) then
 			return "AzeriteIconFrame"
+		elseif IsCosmeticItem and IsCosmeticItem(item.link) then
+			return "CosmeticIconFrame"
 		elseif C_Soulbinds_IsItemConduitByItemInfo(item.link) then
 			return "ConduitIconFrame", "ConduitIconFrame-Corners"
 		end
 	end
 
 	function MyButton:OnUpdate(item)
-		if MerchantFrame:IsShown() and item.isInSet then
-			self:SetAlpha(.3)
-		else
-			self:SetAlpha(1)
-		end
-
 		if self.JunkIcon then
 			if (MerchantFrame:IsShown() or customJunkEnable) and (item.rarity == LE_ITEM_QUALITY_POOR or NDuiADB["CustomJunkList"][item.id]) and item.sellPrice > 0 then
 				self.JunkIcon:Show()
@@ -747,7 +782,7 @@ function module:OnLogin()
 
 		if NDuiDB["Bags"]["BagsiLvl"] and isItemNeedsLevel(item) then
 			local level = B.GetItemLevel(item.link, item.bagID, item.slotID) or item.level
-			if level < NDuiDB["Bags"]["iLvlToShow"] then level = "" end
+			if level <= NDuiDB["Bags"]["iLvlToShow"] then level = "" end
 			local color = DB.QualityColors[item.rarity]
 			self.iLvl:SetText(level)
 			self.iLvl:SetTextColor(color.r, color.g, color.b)
@@ -946,6 +981,7 @@ function module:OnLogin()
 
 	B:RegisterEvent("TRADE_SHOW", module.OpenBags)
 	B:RegisterEvent("TRADE_CLOSED", module.CloseBags)
+	B:RegisterEvent("BANKFRAME_OPENED", module.AutoDeposit)
 
 	-- Fixes
 	BankFrame.GetRight = function() return f.bank:GetRight() end

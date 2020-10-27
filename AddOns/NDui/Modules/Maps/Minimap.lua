@@ -6,6 +6,10 @@ local _G = _G
 local strmatch, strfind, strupper = string.match, string.find, string.upper
 local select, pairs, ipairs, unpack = select, pairs, ipairs, unpack
 local cr, cg, cb = DB.r, DB.g, DB.b
+local LE_GARRISON_TYPE_6_0 = Enum.GarrisonType.Type_6_0
+local LE_GARRISON_TYPE_7_0 = Enum.GarrisonType.Type_7_0
+local LE_GARRISON_TYPE_8_0 = Enum.GarrisonType.Type_8_0
+local LE_GARRISON_TYPE_9_0 = Enum.GarrisonType.Type_9_0
 
 function module:CreatePulse()
 	if not NDuiDB["Map"]["CombatPulse"] then return end
@@ -45,6 +49,15 @@ function module:CreatePulse()
 	end)
 end
 
+local function ToggleLandingPage(_, ...)
+	if InCombatLockdown() then UIErrorsFrame:AddMessage(DB.InfoColor..ERR_NOT_IN_COMBAT) return end
+	if not C_Garrison.HasGarrison(...) then
+		UIErrorsFrame:AddMessage(DB.InfoColor..CONTRIBUTION_TOOLTIP_UNLOCKED_WHEN_ACTIVE)
+		return
+	end
+	ShowGarrisonLandingPage(...)
+end
+
 function module:ReskinRegions()
 	-- Garrison
 	hooksecurefunc("GarrisonLandingPageMinimapButton_UpdateIcon", function(self)
@@ -59,6 +72,27 @@ function module:ReskinRegions()
 			RecycleBinToggleButton:SetPoint("BOTTOMRIGHT", -15, -6)
 			RecycleBinToggleButton.settled = true
 		end
+	end)
+
+	local menuFrame = CreateFrame("Frame", "NDuiGarrisonTypeMenu", GarrisonLandingPageMinimapButton, "UIDropDownMenuTemplate")
+	local menuList = {
+		{text =	GARRISON_TYPE_9_0_LANDING_PAGE_TITLE, func = ToggleLandingPage, arg1 = LE_GARRISON_TYPE_9_0, notCheckable = true},
+		{text =	WAR_CAMPAIGN, func = ToggleLandingPage, arg1 = LE_GARRISON_TYPE_8_0, notCheckable = true},
+		{text =	ORDER_HALL_LANDING_PAGE_TITLE, func = ToggleLandingPage, arg1 = LE_GARRISON_TYPE_7_0, notCheckable = true},
+		{text =	GARRISON_LANDING_PAGE_TITLE, func = ToggleLandingPage, arg1 = LE_GARRISON_TYPE_6_0, notCheckable = true},
+	}
+	GarrisonLandingPageMinimapButton:HookScript("OnMouseDown", function(self, btn)
+		if btn == "RightButton" then
+			HideUIPanel(GarrisonLandingPage)
+			EasyMenu(menuList, menuFrame, self, -80, 0, "MENU", 1)
+		end
+	end)
+	GarrisonLandingPageMinimapButton:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+		GameTooltip:SetText(self.title, 1, 1, 1)
+		GameTooltip:AddLine(self.description, nil, nil, nil, true)
+		GameTooltip:AddLine(L["SwitchGarrisonType"], nil, nil, nil, true)
+		GameTooltip:Show();
 	end)
 
 	-- QueueStatus Button
@@ -298,6 +332,8 @@ function module:WhoPingsMyMap()
 	anim.fader:SetStartDelay(3)
 
 	B:RegisterEvent("MINIMAP_PING", function(_, unit)
+		if unit == "player" then return end -- ignore player ping
+
 		local class = select(2, UnitClass(unit))
 		local r, g, b = B.ClassColor(class)
 		local name = GetUnitName(unit)

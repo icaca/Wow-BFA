@@ -10,7 +10,7 @@ local GetInstanceInfo, UnitClassification, UnitExists, InCombatLockdown = GetIns
 local C_Scenario_GetInfo, C_Scenario_GetStepInfo, C_MythicPlus_GetCurrentAffixes = C_Scenario.GetInfo, C_Scenario.GetStepInfo, C_MythicPlus.GetCurrentAffixes
 local UnitGUID, GetPlayerInfoByGUID, Ambiguate = UnitGUID, GetPlayerInfoByGUID, Ambiguate
 local SetCVar, UIFrameFadeIn, UIFrameFadeOut = SetCVar, UIFrameFadeIn, UIFrameFadeOut
-local IsInRaid, IsInGroup, UnitName = IsInRaid, IsInGroup, UnitName
+local IsInRaid, IsInGroup, UnitName, UnitHealth, UnitHealthMax = IsInRaid, IsInGroup, UnitName, UnitHealth, UnitHealthMax
 local GetNumGroupMembers, GetNumSubgroupMembers, UnitGroupRolesAssigned = GetNumGroupMembers, GetNumSubgroupMembers, UnitGroupRolesAssigned
 local C_NamePlate_GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GetSpellCooldown, GetTime = GetSpellCooldown, GetTime
@@ -38,10 +38,6 @@ function UF:UpdatePlateAlpha()
 	SetCVar("nameplateMaxAlpha", NDuiDB["Nameplate"]["MinAlpha"])
 end
 
-function UF:UpdatePlateRange()
-	SetCVar("nameplateMaxDistance", NDuiDB["Nameplate"]["Distance"])
-end
-
 function UF:UpdatePlateSpacing()
 	SetCVar("nameplateOverlapV", NDuiDB["Nameplate"]["VerticalSpacing"])
 end
@@ -56,7 +52,6 @@ function UF:SetupCVars()
 	UF:PlateInsideView()
 	SetCVar("nameplateOverlapH", .8)
 	UF:UpdatePlateSpacing()
-	UF:UpdatePlateRange()
 	UF:UpdatePlateAlpha()
 	SetCVar("nameplateSelectedAlpha", 1)
 	SetCVar("showQuestTrackingTooltips", 1)
@@ -176,6 +171,8 @@ function UF:UpdateColor(_, unit)
 	local insecureColor = NDuiDB["Nameplate"]["InsecureColor"]
 	local revertThreat = NDuiDB["Nameplate"]["DPSRevertThreat"]
 	local offTankColor = NDuiDB["Nameplate"]["OffTankColor"]
+	local executeRatio = NDuiDB["Nameplate"]["ExecuteRatio"]
+	local healthPerc = UnitHealth(unit) / (UnitHealthMax(unit) + .0001) * 100
 	local r, g, b
 
 	if not UnitIsConnected(unit) then
@@ -235,6 +232,12 @@ function UF:UpdateColor(_, unit)
 		end
 	else
 		self.ThreatIndicator:Hide()
+	end
+
+	if executeRatio > 0 and healthPerc <= executeRatio then
+		self.nameText:SetTextColor(1, 0, 0)
+	else
+		self.nameText:SetTextColor(1, 1, 1)
 	end
 end
 
@@ -624,7 +627,8 @@ end
 -- WidgetContainer
 function UF:AddWidgetContainer(self)
 	local widgetContainer = CreateFrame("Frame", nil, self, "UIWidgetContainerTemplate")
-	widgetContainer:SetPoint("BOTTOM", self, "TOP")
+	widgetContainer:SetPoint("TOP", self.Castbar, "BOTTOM", 0, -5)
+	widgetContainer:SetScale(1/NDuiADB["UIScale"]) -- need reviewed
 	widgetContainer:Hide()
 
 	self.WidgetContainer = widgetContainer
@@ -939,7 +943,7 @@ function UF:ResizePlayerPlate()
 			local size = (barWidth - 10)/6
 			for i = 1, 6 do
 				local dice = plate.dices[i]
-				dice:SetSize(size, size)
+				dice:SetSize(size, size/2)
 				if i == 1 then
 					dice:SetPoint("BOTTOMLEFT", plate.Health, "TOPLEFT", 0, offset)
 				end
