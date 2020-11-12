@@ -12,7 +12,7 @@ local LE_GARRISON_TYPE_8_0 = Enum.GarrisonType.Type_8_0
 local LE_GARRISON_TYPE_9_0 = Enum.GarrisonType.Type_9_0
 
 function module:CreatePulse()
-	if not NDuiDB["Map"]["CombatPulse"] then return end
+	if not C.db["Map"]["CombatPulse"] then return end
 
 	local bg = B.SetBD(Minimap)
 	local anim = bg:CreateAnimationGroup()
@@ -74,7 +74,6 @@ function module:ReskinRegions()
 		end
 	end)
 
-	local menuFrame = CreateFrame("Frame", "NDuiGarrisonTypeMenu", GarrisonLandingPageMinimapButton, "UIDropDownMenuTemplate")
 	local menuList = {
 		{text =	GARRISON_TYPE_9_0_LANDING_PAGE_TITLE, func = ToggleLandingPage, arg1 = LE_GARRISON_TYPE_9_0, notCheckable = true},
 		{text =	WAR_CAMPAIGN, func = ToggleLandingPage, arg1 = LE_GARRISON_TYPE_8_0, notCheckable = true},
@@ -84,7 +83,7 @@ function module:ReskinRegions()
 	GarrisonLandingPageMinimapButton:HookScript("OnMouseDown", function(self, btn)
 		if btn == "RightButton" then
 			HideUIPanel(GarrisonLandingPage)
-			EasyMenu(menuList, menuFrame, self, -80, 0, "MENU", 1)
+			EasyMenu(menuList, B.EasyMenu, self, -80, 0, "MENU", 1)
 		end
 	end)
 	GarrisonLandingPageMinimapButton:SetScript("OnEnter", function(self)
@@ -161,7 +160,7 @@ function module:ReskinRegions()
 end
 
 function module:RecycleBin()
-	if not NDuiDB["Map"]["ShowRecycleBin"] then return end
+	if not C.db["Map"]["ShowRecycleBin"] then return end
 
 	local buttons = {}
 	local blackList = {
@@ -315,7 +314,7 @@ function module:RecycleBin()
 end
 
 function module:WhoPingsMyMap()
-	if not NDuiDB["Map"]["WhoPings"] then return end
+	if not C.db["Map"]["WhoPings"] then return end
 
 	local f = CreateFrame("Frame", nil, Minimap)
 	f:SetAllPoints()
@@ -347,13 +346,13 @@ end
 
 function module:UpdateMinimapScale()
 	local size = Minimap:GetWidth()
-	local scale = NDuiDB["Map"]["MinimapScale"]
+	local scale = C.db["Map"]["MinimapScale"]
 	Minimap:SetScale(scale)
 	Minimap.mover:SetSize(size*scale, size*scale)
 end
 
 function module:ShowMinimapClock()
-	if NDuiDB["Map"]["Clock"] then
+	if C.db["Map"]["Clock"] then
 		if not TimeManagerClockButton then LoadAddOn("Blizzard_TimeManager") end
 		if not TimeManagerClockButton.styled then
 			TimeManagerClockButton:DisableDrawLayer("BORDER")
@@ -370,7 +369,7 @@ function module:ShowMinimapClock()
 end
 
 function module:ShowCalendar()
-	if NDuiDB["Map"]["Calendar"] then
+	if C.db["Map"]["Calendar"] then
 		if not GameTimeFrame.styled then
 			GameTimeFrame:SetNormalTexture(nil)
 			GameTimeFrame:SetPushedTexture(nil)

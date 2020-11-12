@@ -58,7 +58,7 @@ do
 		elseif s > 3 then
 			return format("|cffffff00%d|r", s), s - floor(s)
 		else
-			if NDuiDB["Actionbar"]["DecimalCD"] then
+			if C.db["Actionbar"]["DecimalCD"] then
 				return format("|cffff0000%.1f|r", s), s - format("%.1f", s)
 			else
 				return format("|cffff0000%d|r", s + .5), s - floor(s)
@@ -170,6 +170,7 @@ do
 	local essenceDescription = GetSpellDescription(277253)
 	local ITEM_SPELL_TRIGGER_ONEQUIP = ITEM_SPELL_TRIGGER_ONEQUIP
 	local RETRIEVING_ITEM_INFO = RETRIEVING_ITEM_INFO
+
 	local tip = CreateFrame("GameTooltip", "NDui_ScanTooltip", nil, "GameTooltipTemplate")
 	B.ScanTip = tip
 
@@ -384,6 +385,9 @@ end
 
 -- UI widgets
 do
+	-- Dropdown menu
+	B.EasyMenu = CreateFrame("Frame", "NDui_EasyMenu", UIParent, "UIDropDownMenuTemplate")
+
 	-- Fontstring
 	function B:CreateFS(size, text, color, anchor, x, y)
 		local fs = self:CreateFontString(nil, "OVERLAY")
@@ -485,7 +489,7 @@ do
 	local shadowBackdrop = {edgeFile = DB.glowTex}
 
 	function B:CreateSD(size, override)
-		if not override and not NDuiDB["Skins"]["Shadow"] then return end
+		if not override and not C.db["Skins"]["Shadow"] then return end
 		if self.__shadow then return end
 
 		local frame = self
@@ -511,7 +515,7 @@ do
 	function B:CreateBD(a)
 		defaultBackdrop.edgeSize = C.mult
 		self:SetBackdrop(defaultBackdrop)
-		self:SetBackdropColor(0, 0, 0, a or NDuiDB["Skins"]["SkinAlpha"])
+		self:SetBackdropColor(0, 0, 0, a or C.db["Skins"]["SkinAlpha"])
 		self:SetBackdropBorderColor(0, 0, 0)
 		if not a then tinsert(C.frames, self) end
 	end
@@ -520,7 +524,7 @@ do
 		local tex = self:CreateTexture(nil, "BORDER")
 		tex:SetInside()
 		tex:SetTexture(DB.bdTex)
-		if NDuiDB["Skins"]["FlatMode"] then
+		if C.db["Skins"]["FlatMode"] then
 			tex:SetVertexColor(.3, .3, .3, .25)
 		else
 			tex:SetGradientAlpha("Vertical", 0, 0, 0, .5, .3, .3, .3, .3)
@@ -649,7 +653,7 @@ do
 		self.__owner.bg:SetBackdropBorderColor(color.r, color.g, color.b)
 	end
 	local function updateIconBorderColor(self, r, g, b)
-		if (r==.65882 and g==.65882 and b==.65882) or (r==1 and g==1 and b==1) then
+		if (r==.65882 and g==.65882 and b==.65882) or (r>.99 and g>.99 and b>.99) then
 			r, g, b = 0, 0, 0
 		end
 		self.__owner.bg:SetBackdropBorderColor(r, g, b)
@@ -698,7 +702,7 @@ do
 	local function Button_OnEnter(self)
 		if not self:IsEnabled() then return end
 
-		if NDuiDB["Skins"]["FlatMode"] then
+		if C.db["Skins"]["FlatMode"] then
 			self.__gradient:SetVertexColor(cr / 4, cg / 4, cb / 4)
 		else
 			self.__bg:SetBackdropColor(cr, cg, cb, .25)
@@ -706,7 +710,7 @@ do
 		self.__bg:SetBackdropBorderColor(cr, cg, cb)
 	end
 	local function Button_OnLeave(self)
-		if NDuiDB["Skins"]["FlatMode"] then
+		if C.db["Skins"]["FlatMode"] then
 			self.__gradient:SetVertexColor(.3, .3, .3, .25)
 		else
 			self.__bg:SetBackdropColor(0, 0, 0, 0)
@@ -781,7 +785,7 @@ do
 		self.bg:SetBackdropBorderColor(0, 0, 0)
 	end
 	local function Menu_OnMouseUp(self)
-		self.bg:SetBackdropColor(0, 0, 0, NDuiDB["Skins"]["SkinAlpha"])
+		self.bg:SetBackdropColor(0, 0, 0, C.db["Skins"]["SkinAlpha"])
 	end
 	local function Menu_OnMouseDown(self)
 		self.bg:SetBackdropColor(cr, cg, cb, .25)
@@ -1336,6 +1340,7 @@ do
 		eb:SetTextInsets(5, 5, 0, 0)
 		eb:SetFont(DB.Font[1], DB.Font[2]+2, DB.Font[3])
 		eb.bg = B.CreateBDFrame(eb, .25, true)
+		eb.bg:SetAllPoints()
 		eb:SetScript("OnEscapePressed", editBoxClearFocus)
 		eb:SetScript("OnEnterPressed", editBoxClearFocus)
 
@@ -1448,6 +1453,15 @@ do
 		ColorPickerFrame:Show()
 	end
 
+	local function GetSwatchTexColor(tex)
+		local r, g, b = tex:GetVertexColor()
+		r = B:Round(r, 2)
+		g = B:Round(g, 2)
+		b = B:Round(b, 2)
+		print(r,g,b)
+		return r, g, b
+	end
+
 	function B:CreateColorSwatch(name, color)
 		color = color or {r=1, g=1, b=1}
 
@@ -1459,6 +1473,7 @@ do
 		tex:SetInside()
 		tex:SetTexture(DB.bdTex)
 		tex:SetVertexColor(color.r, color.g, color.b)
+		tex.GetColor = GetSwatchTexColor
 
 		swatch.tex = tex
 		swatch.color = color

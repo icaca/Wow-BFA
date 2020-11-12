@@ -934,6 +934,9 @@ C.themes["Blizzard_GarrisonUI"] = function()
 	-- Covenant Mission UI
 	local CovenantMissionFrame = CovenantMissionFrame
 	ReskinMissionFrame(CovenantMissionFrame)
+	if CovenantMissionFrame.RaisedBorder then
+		CovenantMissionFrame.RaisedBorder:SetAlpha(0) -- not in prepatch
+	end
 	CovenantMissionFrameMissions.RaisedFrameEdges:SetAlpha(0)
 
 	CombatLog:DisableDrawLayer("BACKGROUND")
@@ -950,7 +953,7 @@ C.themes["Blizzard_GarrisonUI"] = function()
 	CovenantMissionFrame.FollowerTab.HealFollowerFrame.ButtonFrame:SetAlpha(0)
 	CovenantMissionFrameFollowers.ElevatedFrame:SetAlpha(0)
 	if CovenantMissionFrameFollowers.HealAllButton then
-		B.Reskin(CovenantMissionFrameFollowers.HealAllButton) -- not in ptr
+		B.Reskin(CovenantMissionFrameFollowers.HealAllButton) -- not in prepatch
 	end
 	CovenantMissionFrame.MapTab:SetAlpha(0) -- not sure what does this for, need reviewed
 	B.ReskinIcon(CovenantMissionFrame.FollowerTab.HealFollowerFrame.CostFrame.CostIcon)
@@ -1001,12 +1004,35 @@ C.themes["Blizzard_GarrisonUI"] = function()
 	-- WarPlan
 	if IsAddOnLoaded("WarPlan") then
 		local function reskinWarPlanFont(font, r, g, b)
-			if not NDuiDB["Skins"]["FontOutline"] then return end
+			if not C.db["Skins"]["FontOutline"] then return end
 			if not font then return end
 			font:SetTextColor(r, g, b)
 		end
 
-		C_Timer.After(.5, function()
+		local function reskinWarPlanMissions(self)
+			local missions = self.TaskBoard.Missions
+			for i = 1, #missions do
+				local button = missions[i]
+				if not button.styled then
+					reskinWarPlanFont(button.XPReward, 1, 1, 1)
+					reskinWarPlanFont(button.Description, .8, .8, .8)
+					reskinWarPlanFont(button.CDTDisplay, 1, 1, 1)
+
+					local groups = button.Groups
+					if groups then
+						for j = 1, #groups do
+							local group = groups[j]
+							B.Reskin(group)
+							reskinWarPlanFont(group.Features, 1, .8, 0)
+						end
+					end
+
+					button.styled = true
+				end
+			end
+		end
+
+		C_Timer.After(.1, function()
 			local WarPlanFrame = _G.WarPlanFrame
 			if not WarPlanFrame then return end
 
@@ -1016,23 +1042,9 @@ C.themes["Blizzard_GarrisonUI"] = function()
 			B.ReskinClose(WarPlanFrame.ArtFrame.CloseButton)
 			reskinWarPlanFont(WarPlanFrame.ArtFrame.TitleText, 1, .8, 0)
 
+			reskinWarPlanMissions(WarPlanFrame)
+			WarPlanFrame:HookScript("OnShow", reskinWarPlanMissions)
 			B.Reskin(WarPlanFrame.TaskBoard.AllPurposeButton)
-			local missions = WarPlanFrame.TaskBoard.Missions
-			for i = 1, #missions do
-				local button = missions[i]
-				reskinWarPlanFont(button.XPReward, 1, 1, 1)
-				reskinWarPlanFont(button.Description, .8, .8, .8)
-				reskinWarPlanFont(button.CDTDisplay, 1, 1, 1)
-
-				local groups = button.Groups
-				if groups then
-					for j = 1, #groups do
-						local group = groups[j]
-						B.Reskin(group)
-						reskinWarPlanFont(group.Features, 1, .8, 0)
-					end
-				end
-			end
 
 			local entries = WarPlanFrame.HistoryFrame.Entries
 			for i = 1, #entries do
