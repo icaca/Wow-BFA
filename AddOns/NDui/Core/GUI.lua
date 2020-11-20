@@ -2,10 +2,9 @@ local _, ns = ...
 local B, C, L, DB = unpack(ns)
 local G = B:RegisterModule("GUI")
 
-local tonumber, tostring, pairs, ipairs, next, select, type = tonumber, tostring, pairs, ipairs, next, select, type
-local tinsert, strsplit, strfind = table.insert, string.split, string.find
+local tonumber, pairs, ipairs, next, type, tinsert = tonumber, pairs, ipairs, next, type, tinsert
 local cr, cg, cb = DB.r, DB.g, DB.b
-local guiTab, guiPage, f, dataFrame = {}, {}
+local guiTab, guiPage, f = {}, {}
 
 -- Default Settings
 G.DefaultSettings = {
@@ -50,7 +49,6 @@ G.DefaultSettings = {
 		BagsiLvl = true,
 		BagSortMode = 1,
 		ItemFilter = true,
-		ItemSetFilter = false,
 		DeleteButton = true,
 		FavouriteItems = {},
 		GatherEmpty = false,
@@ -68,6 +66,8 @@ G.DefaultSettings = {
 		FilterMount = true,
 		FilterFavourite = true,
 		FilterGoods = false,
+		FilterQuest = false,
+		FilterEquipSet = false,
 	},
 	Auras = {
 		Reminder = true,
@@ -492,17 +492,6 @@ end
 
 local function updateBagStatus()
 	B:GetModule("Bags"):UpdateAllBags()
-
-	local label = BAG_FILTER_EQUIPMENT
-	if C.db["Bags"]["ItemSetFilter"] then
-		label = L["Equipement Set"]
-	end
-	if _G.NDui_BackpackEquipment then
-		_G.NDui_BackpackEquipment.label:SetText(label)
-	end
-	if _G.NDui_BackpackBankEquipment then
-		_G.NDui_BackpackBankEquipment.label:SetText(label)
-	end
 end
 
 local function updateActionbarScale()
@@ -729,7 +718,7 @@ end
 
 -- Config
 local HeaderTag = "|cff00cc4c"
-local NewFeatureTag = "|TInterface\\OptionsFrame\\UI-OptionsFrame-NewFeatureIcon:0:0:0:-1|t"
+local NewFeatureTag = "|TInterface\\OptionsFrame\\UI-OptionsFrame-NewFeatureIcon:0|t"
 
 G.TabList = {
 	L["Actionbar"],
@@ -779,14 +768,13 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 	[2] = {
 		{1, "Bags", "Enable", HeaderTag..L["Enable Bags"]},
 		{},--blank
-		{1, "Bags", "ItemFilter", L["Bags ItemFilter"].."*", nil, setupBagFilter, updateBagStatus},
-		{1, "Bags", "ItemSetFilter", L["Use ItemSetFilter"].."*", true, nil, updateBagStatus, L["ItemSetFilterTips"]},
-		{1, "Bags", "GatherEmpty", L["Bags GatherEmpty"].."*", nil, nil, updateBagStatus},
-		{1, "Bags", "SpecialBagsColor", L["SpecialBagsColor"].."*", true, nil, updateBagStatus, L["SpecialBagsColorTip"]},
-		{1, "Bags", "ShowNewItem", L["Bags ShowNewItem"]},
+		{1, "Bags", "ItemFilter", NewFeatureTag..L["Bags ItemFilter"].."*", nil, setupBagFilter, updateBagStatus},
+		{1, "Bags", "GatherEmpty", L["Bags GatherEmpty"].."*", true, nil, updateBagStatus},
+		{1, "Bags", "SpecialBagsColor", L["SpecialBagsColor"].."*", nil, nil, updateBagStatus, L["SpecialBagsColorTip"]},
 		{1, "Bags", "DeleteButton", L["Bags DeleteButton"], true},
 		{1, "Bags", "BagsiLvl", L["Bags Itemlevel"].."*", nil, nil, updateBagStatus},
-		{3, "Bags", "iLvlToShow", L["iLvlToShow"].."*", nil, {1, 500, 1}, updateBagStatus, L["iLvlToShowTip"]},
+		{1, "Bags", "ShowNewItem", L["Bags ShowNewItem"], true},
+		{3, "Bags", "iLvlToShow", L["iLvlToShow"].."*", nil, {1, 500, 1}, nil, L["iLvlToShowTip"]},
 		{4, "Bags", "BagSortMode", L["BagSortMode"].."*", true, {L["Forward"], L["Backward"], DISABLE}, updateBagSortOrder},
 		{},--blank
 		{3, "Bags", "BagsScale", L["Bags Scale"], false, {.5, 1.5, .1}},
@@ -1278,339 +1266,59 @@ local function CreateOption(i)
 	footer:SetPoint("TOPLEFT", 25, -offset)
 end
 
-local bloodlustFilter = {
-	[57723] = true,
-	[57724] = true,
-	[80354] = true,
-	[264689] = true
+local function resetUrlBox(self)
+	self:SetText(self.url)
+	self:HighlightText()
+end
+
+local function CreateContactBox(parent, text, url, index)
+	B.CreateFS(parent, 14, text, "system", "TOP", 0, -50 - (index-1) * 60)
+	local box = B.CreateEditBox(parent, 250, 24)
+	box:SetPoint("TOP", 0, -70 - (index-1) * 60)
+	box.url = url
+	resetUrlBox(box)
+	box:SetScript("OnTextChanged", resetUrlBox)
+	box:SetScript("OnCursorChanged", resetUrlBox)
+end
+
+local donationList = {
+	["afdian"] = "33578473, normanvon, y368413, EK, msylgj, 夜丨灬清寒, akakai, reisen410, 其实你很帥, 萨菲尔, Antares, RyanZ, fldqw, Mario, 时光旧予, 食铁骑兵, 爱蕾丝的基总, 施然, 命运镇魂曲, 不可语上, Leo, 忘川, 刘翰承, 悟空海外党, cncj, 暗月, 汪某人, 黑手, iraq120, 嗜血, 我又不是妖怪，以及部分未备注名字的用户。",
+	["Patreon"] = "Quentin, Julian Neigefind, silenkin, imba Villain, Zeyu Zhu.",
 }
-
-function G:ExportGUIData()
-	local text = "NDuiSettings:"..DB.Version..":"..DB.MyName..":"..DB.MyClass
-	for KEY, VALUE in pairs(C.db) do
-		if type(VALUE) == "table" then
-			for key, value in pairs(VALUE) do
-				if type(value) == "table" then
-					if value.r then
-						for k, v in pairs(value) do
-							text = text..";"..KEY..":"..key..":"..k..":"..v
-						end
-					elseif key == "ExplosiveCache" then
-						text = text..";"..KEY..":"..key..":EMPTYTABLE"
-					elseif KEY == "AuraWatchList" then
-						if key == "Switcher" then
-							for k, v in pairs(value) do
-								text = text..";"..KEY..":"..key..":"..k..":"..tostring(v)
-							end
-						elseif key == "IgnoreSpells" then
-							text = text..";"..KEY..":"..key
-							for spellID in pairs(value) do
-								text = text..":"..tostring(spellID)
-							end
-						else
-							for spellID, k in pairs(value) do
-								text = text..";"..KEY..":"..key..":"..spellID
-								if k[5] == nil then k[5] = false end
-								for _, v in ipairs(k) do
-									text = text..":"..tostring(v)
-								end
-							end
-						end
-					elseif KEY == "Mover" or KEY == "RaidClickSets" or KEY == "InternalCD" or KEY == "AuraWatchMover" then
-						text = text..";"..KEY..":"..key
-						for _, v in ipairs(value) do
-							text = text..":"..tostring(v)
-						end
-					elseif key == "FavouriteItems" then
-						text = text..";"..KEY..":"..key
-						for itemID in pairs(value) do
-							text = text..":"..tostring(itemID)
-						end
-					end
-				else
-					if C.db[KEY][key] ~= G.DefaultSettings[KEY][key] then -- don't export default settings
-						text = text..";"..KEY..":"..key..":"..tostring(value)
-					end
-				end
-			end
-		end
-	end
-
-	for KEY, VALUE in pairs(NDuiADB) do
-		if KEY == "RaidAuraWatch" or KEY == "CustomJunkList" then
-			text = text..";ACCOUNT:"..KEY
-			for spellID in pairs(VALUE) do
-				text = text..":"..spellID
-			end
-		elseif KEY == "RaidDebuffs" then
-			for instName, value in pairs(VALUE) do
-				for spellID, prio in pairs(value) do
-					text = text..";ACCOUNT:"..KEY..":"..instName..":"..spellID..":"..prio
-				end
-			end
-		elseif KEY == "NameplateFilter" then
-			for index, value in pairs(VALUE) do
-				text = text..";ACCOUNT:"..KEY..":"..index
-				for spellID in pairs(value) do
-					text = text..":"..spellID
-				end
-			end
-		elseif KEY == "CornerBuffs" then
-			for class, value in pairs(VALUE) do
-				for spellID, data in pairs(value) do
-					if not bloodlustFilter[spellID] and class == DB.MyClass then
-						local anchor, color, filter = unpack(data)
-						text = text..";ACCOUNT:"..KEY..":"..class..":"..spellID..":"..anchor..":"..color[1]..":"..color[2]..":"..color[3]..":"..tostring(filter or false)
-					end
-				end
-			end
-		elseif KEY == "PartyWatcherSpells" then
-			text = text..";ACCOUNT:"..KEY
-			for spellID, duration in pairs(VALUE) do
-				local name = GetSpellInfo(spellID)
-				if name then
-					text = text..":"..spellID..":"..duration
-				end
-			end
-		elseif KEY == "ContactList" then
-			for name, color in pairs(VALUE) do
-				text = text..";ACCOUNT:"..KEY..":"..name..":"..color
-			end
-		elseif KEY == "ProfileIndex" or KEY == "ProfileNames" then
-			for k, v in pairs(VALUE) do
-				text = text..";ACCOUNT:"..KEY..":"..k..":"..v
-			end
-		end
-	end
-
-	dataFrame.editBox:SetText(B:Encode(text))
-	dataFrame.editBox:HighlightText()
+local function CreateDonationIcon(parent, texture, name, xOffset)
+	local button = B.CreateButton(parent, 30, 30, true, texture)
+	button:SetPoint("BOTTOM", xOffset, 45)
+	button.title = format(L["Donation"], name)
+	B.AddTooltip(button, "ANCHOR_TOP", "|n"..donationList[name], "info")
 end
 
-local function toBoolean(value)
-	if value == "true" then
-		return true
-	elseif value == "false" then
-		return false
-	end
-end
+function G:AddContactFrame()
+	if G.ContactFrame then G.ContactFrame:Show() return end
 
-local function reloadDefaultSettings()
-	for i, j in pairs(G.DefaultSettings) do
-		if type(j) == "table" then
-			if not C.db[i] then C.db[i] = {} end
-			for k, v in pairs(j) do
-				C.db[i][k] = v
-			end
-		else
-			C.db[i] = j
-		end
-	end
-	C.db["BFA"] = true -- don't empty data on next loading
-end
+	local frame = CreateFrame("Frame", nil, UIParent)
+	frame:SetSize(300, 300)
+	frame:SetPoint("CENTER")
+	B.SetBD(frame)
+	B.CreateWatermark(frame)
 
-function G:ImportGUIData()
-	local profile = dataFrame.editBox:GetText()
-	if B:IsBase64(profile) then profile = B:Decode(profile) end
-	local options = {strsplit(";", profile)}
-	local title, _, _, class = strsplit(":", options[1])
-	if title ~= "NDuiSettings" then
-		UIErrorsFrame:AddMessage(DB.InfoColor..L["Import data error"])
-		return
-	end
+	B.CreateFS(frame, 16, L["Contact"], true, "TOP", 0, -10)
+	local ll = B.SetGradient(frame, "H", .7, .7, .7, 0, .5, 80, C.mult)
+	ll:SetPoint("TOP", -40, -32)
+	local lr = B.SetGradient(frame, "H", .7, .7, .7, .5, 0, 80, C.mult)
+	lr:SetPoint("TOP", 40, -32)
 
-	-- we don't export default settings, so need to reload it
-	reloadDefaultSettings()
+	CreateContactBox(frame, "NGA.CN", "https://bbs.nga.cn/read.php?tid=5483616", 1)
+	CreateContactBox(frame, "GitHub", "https://github.com/siweia/NDui", 2)
+	CreateContactBox(frame, "Discord", "https://discord.gg/WXgrfBm", 3)
 
-	for i = 2, #options do
-		local option = options[i]
-		local key, value, arg1 = strsplit(":", option)
-		if arg1 == "true" or arg1 == "false" then
-			C.db[key][value] = toBoolean(arg1)
-		elseif arg1 == "EMPTYTABLE" then
-			C.db[key][value] = {}
-		elseif strfind(value, "Color") and (arg1 == "r" or arg1 == "g" or arg1 == "b") then
-			local color = select(4, strsplit(":", option))
-			if C.db[key][value] then
-				C.db[key][value][arg1] = tonumber(color)
-			end
-		elseif key == "AuraWatchList" then
-			if value == "Switcher" then
-				local index, state = select(3, strsplit(":", option))
-				C.db[key][value][tonumber(index)] = toBoolean(state)
-			elseif value == "IgnoreSpells" then
-				local spells = {select(3, strsplit(":", option))}
-				for _, spellID in next, spells do
-					C.db[key][value][tonumber(spellID)] = true
-				end
-			else
-				local idType, spellID, unit, caster, stack, amount, timeless, combat, text, flash = select(4, strsplit(":", option))
-				value = tonumber(value)
-				arg1 = tonumber(arg1)
-				spellID = tonumber(spellID)
-				stack = tonumber(stack)
-				amount = toBoolean(amount)
-				timeless = toBoolean(timeless)
-				combat = toBoolean(combat)
-				flash = toBoolean(flash)
-				if not C.db[key][value] then C.db[key][value] = {} end
-				C.db[key][value][arg1] = {idType, spellID, unit, caster, stack, amount, timeless, combat, text, flash}
-			end
-		elseif value == "FavouriteItems" then
-			local items = {select(3, strsplit(":", option))}
-			for _, itemID in next, items do
-				C.db[key][value][tonumber(itemID)] = true
-			end
-		elseif key == "Mover" or key == "AuraWatchMover" then
-			local relFrom, parent, relTo, x, y = select(3, strsplit(":", option))
-			value = tonumber(value) or value
-			x = tonumber(x)
-			y = tonumber(y)
-			C.db[key][value] = {relFrom, parent, relTo, x, y}
-		elseif key == "RaidClickSets" then
-			if DB.MyClass == class then
-				C.db[key][value] = {select(3, strsplit(":", option))}
-			end
-		elseif key == "InternalCD" then
-			local spellID, duration, indicator, unit, itemID = select(3, strsplit(":", option))
-			spellID = tonumber(spellID)
-			duration = tonumber(duration)
-			itemID = tonumber(itemID)
-			C.db[key][spellID] = {spellID, duration, indicator, unit, itemID}
-		elseif key == "ACCOUNT" then
-			if value == "RaidAuraWatch" or value == "CustomJunkList" then
-				local spells = {select(3, strsplit(":", option))}
-				for _, spellID in next, spells do
-					NDuiADB[value][tonumber(spellID)] = true
-				end
-			elseif value == "RaidDebuffs" then
-				local instName, spellID, priority = select(3, strsplit(":", option))
-				if not NDuiADB[value][instName] then NDuiADB[value][instName] = {} end
-				NDuiADB[value][instName][tonumber(spellID)] = tonumber(priority)
-			elseif value == "NameplateFilter" then
-				local spells = {select(4, strsplit(":", option))}
-				for _, spellID in next, spells do
-					NDuiADB[value][tonumber(arg1)][tonumber(spellID)] = true
-				end
-			elseif value == "CornerBuffs" then
-				local class, spellID, anchor, r, g, b, filter = select(3, strsplit(":", option))
-				spellID = tonumber(spellID)
-				r = tonumber(r)
-				g = tonumber(g)
-				b = tonumber(b)
-				filter = toBoolean(filter)
-				if not NDuiADB[value][class] then NDuiADB[value][class] = {} end
-				NDuiADB[value][class][spellID] = {anchor, {r, g, b}, filter}
-			elseif value == "PartyWatcherSpells" then
-				local options = {strsplit(":", option)}
-				local index = 3
-				local spellID = options[index]
-				while spellID do
-					local duration = options[index+1]
-					NDuiADB[value][tonumber(spellID)] = tonumber(duration) or 0
-					index = index + 2
-					spellID = options[index]
-				end
-			elseif value == "ContactList" then
-				local name, r, g, b = select(3, strsplit(":", option))
-				NDuiADB[value][name] = r..":"..g..":"..b
-			elseif value == "ProfileIndex" then
-				local name, index = select(3, strsplit(":", option))
-				NDuiADB[value][name] = tonumber(index)
-			elseif value == "ProfileNames" then
-				local index, name = select(3, strsplit(":", option))
-				NDuiADB[value][tonumber(index)] = name
-			end
-		elseif tonumber(arg1) then
-			if value == "DBMCount" then
-				C.db[key][value] = arg1
-			else
-				C.db[key][value] = tonumber(arg1)
-			end
-		end
-	end
-end
+	CreateDonationIcon(frame, DB.afdianTex, "afdian", -20)
+	CreateDonationIcon(frame, DB.patreonTex, "Patreon", 20)
 
-local function updateTooltip()
-	local profile = dataFrame.editBox:GetText()
-	if B:IsBase64(profile) then profile = B:Decode(profile) end
-	local option = strsplit(";", profile)
-	local title, version, name, class = strsplit(":", option)
-	if title == "NDuiSettings" then
-		dataFrame.version = version
-		dataFrame.name = name
-		dataFrame.class = class
-	else
-		dataFrame.version = nil
-	end
-end
+	local back = B.CreateButton(frame, 120, 20, OKAY)
+	back:SetPoint("BOTTOM", 0, 15)
+	back:SetScript("OnClick", function() frame:Hide() end)
 
-function G:CreateDataFrame()
-	if dataFrame then dataFrame:Show() return end
-
-	dataFrame = CreateFrame("Frame", nil, UIParent)
-	dataFrame:SetPoint("CENTER")
-	dataFrame:SetSize(500, 500)
-	dataFrame:SetFrameStrata("DIALOG")
-	B.CreateMF(dataFrame)
-	B.SetBD(dataFrame)
-	dataFrame.Header = B.CreateFS(dataFrame, 16, L["Export Header"], true, "TOP", 0, -5)
-
-	local scrollArea = CreateFrame("ScrollFrame", nil, dataFrame, "UIPanelScrollFrameTemplate")
-	scrollArea:SetPoint("TOPLEFT", 10, -30)
-	scrollArea:SetPoint("BOTTOMRIGHT", -28, 40)
-	B.CreateBDFrame(scrollArea, .25)
-	B.ReskinScroll(scrollArea.ScrollBar)
-
-	local editBox = CreateFrame("EditBox", nil, dataFrame)
-	editBox:SetMultiLine(true)
-	editBox:SetMaxLetters(99999)
-	editBox:EnableMouse(true)
-	editBox:SetAutoFocus(true)
-	editBox:SetFont(DB.Font[1], 14)
-	editBox:SetWidth(scrollArea:GetWidth())
-	editBox:SetHeight(scrollArea:GetHeight())
-	editBox:SetScript("OnEscapePressed", function() dataFrame:Hide() end)
-	scrollArea:SetScrollChild(editBox)
-	dataFrame.editBox = editBox
-
-	StaticPopupDialogs["NDUI_IMPORT_DATA"] = {
-		text = L["Import data warning"],
-		button1 = YES,
-		button2 = NO,
-		OnAccept = function()
-			G:ImportGUIData()
-			ReloadUI()
-		end,
-		whileDead = 1,
-	}
-	local accept = B.CreateButton(dataFrame, 100, 20, OKAY)
-	accept:SetPoint("BOTTOM", 0, 10)
-	accept:SetScript("OnClick", function(self)
-		if self.text:GetText() ~= OKAY and dataFrame.editBox:GetText() ~= "" then
-			StaticPopup_Show("NDUI_IMPORT_DATA")
-		end
-		dataFrame:Hide()
-	end)
-	accept:HookScript("OnEnter", function(self)
-		if dataFrame.editBox:GetText() == "" then return end
-		updateTooltip()
-
-		GameTooltip:SetOwner(self, "ANCHOR_TOP", 0, 10)
-		GameTooltip:ClearLines()
-		if dataFrame.version then
-			GameTooltip:AddLine(L["Data Info"])
-			GameTooltip:AddDoubleLine(L["Version"], dataFrame.version, .6,.8,1, 1,1,1)
-			GameTooltip:AddDoubleLine(L["Character"], dataFrame.name, .6,.8,1, B.ClassColor(dataFrame.class))
-		else
-			GameTooltip:AddLine(L["Data Exception"], 1,0,0)
-		end
-		GameTooltip:Show()
-	end)
-	accept:HookScript("OnLeave", B.HideTooltip)
-	dataFrame.text = accept.text
-
-	G.ProfileDataFrame = dataFrame
+	G.ContactFrame = frame
 end
 
 local function scrollBarHook(self, delta)
@@ -1633,12 +1341,26 @@ local function OpenGUI()
 	B.CreateFS(f, 18, L["NDui Console"], true, "TOP", 0, -10)
 	B.CreateFS(f, 16, DB.Version.." ("..DB.Support..")", false, "TOP", 0, -30)
 
+	local contact = B.CreateButton(f, 130, 20, L["Contact"])
+	contact:SetPoint("BOTTOMLEFT", 20, 15)
+	contact:SetScript("OnClick", function()
+		f:Hide()
+		G:AddContactFrame()
+	end)
+
+	local unlock = B.CreateButton(f, 130, 20, L["UnlockUI"])
+	unlock:SetPoint("BOTTOM", contact, "TOP", 0, 2)
+	unlock:SetScript("OnClick", function()
+		f:Hide()
+		SlashCmdList["NDUI_MOVER"]()
+	end)
+
 	local close = B.CreateButton(f, 80, 20, CLOSE)
 	close:SetPoint("BOTTOMRIGHT", -20, 15)
 	close:SetScript("OnClick", function() f:Hide() end)
 
 	local ok = B.CreateButton(f, 80, 20, OKAY)
-	ok:SetPoint("RIGHT", close, "LEFT", -10, 0)
+	ok:SetPoint("RIGHT", close, "LEFT", -5, 0)
 	ok:SetScript("OnClick", function()
 		B:SetupUIScale()
 		f:Hide()
@@ -1674,14 +1396,8 @@ local function OpenGUI()
 	credit.Icon:SetAllPoints()
 	credit.Icon:SetTexture(DB.creditTex)
 	credit:SetHighlightTexture(DB.creditTex)
-	credit:SetScript("OnEnter", function()
-		GameTooltip:ClearLines()
-		GameTooltip:SetOwner(credit, "ANCHOR_BOTTOMRIGHT")
-		GameTooltip:AddLine("Credits:")
-		GameTooltip:AddLine(GetAddOnMetadata("NDui", "X-Credits"), .6,.8,1, 1)
-		GameTooltip:Show()
-	end)
-	credit:SetScript("OnLeave", B.HideTooltip)
+	credit.title = "Credits"
+	B.AddTooltip(credit, "ANCHOR_BOTTOMLEFT", "|n"..GetAddOnMetadata("NDui", "X-Credits"), "info")
 
 	local function showLater(event)
 		if event == "PLAYER_REGEN_DISABLED" then

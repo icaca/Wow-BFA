@@ -84,7 +84,7 @@ local isIgnoredZone = {
 local function isUsefulAtlas(info)
 	local atlas = info.atlasName
 	if atlas then
-		return strfind(atlas, "[Vv]ignette")
+		return strfind(atlas, "[Vv]ignette") or (atlas == "nazjatar-nagaevent")
 	end
 end
 
@@ -529,11 +529,12 @@ end
 
 -- Incompatible check
 local IncompatibleAddOns = {
-	["Aurora"] = true,
-	["AuroraClassic"] = true,
 	["BigFoot"] = true,
 	["_ShiGuang"] = true,
 	["!!!163UI!!!"] = true,
+	["Aurora"] = true,
+	["AuroraClassic"] = true,
+	["SexyMap"] = true,
 }
 local AddonDependency = {
 	["BigFoot"] = "!!!Libs",

@@ -571,8 +571,9 @@ function module:OnLogin()
 	local bankWidth = C.db["Bags"]["BankWidth"]
 	local iconSize = C.db["Bags"]["IconSize"]
 	local deleteButton = C.db["Bags"]["DeleteButton"]
-	local itemSetFilter = C.db["Bags"]["ItemSetFilter"]
 	local showNewItem = C.db["Bags"]["ShowNewItem"]
+	local hasCanIMogIt = IsAddOnLoaded("CanIMogIt")
+	local hasPawn = IsAddOnLoaded("Pawn")
 
 	-- Init
 	local Backpack = cargBags:NewImplementation("NDui_Backpack")
@@ -609,6 +610,9 @@ function module:OnLogin()
 		f.equipment = MyContainer:New("Equipment", {Columns = bagsWidth, Parent = f.main})
 		f.equipment:SetFilter(filters.bagEquipment, true)
 
+		f.equipSet = MyContainer:New("EquipSet", {Columns = bagsWidth, Parent = f.main})
+		f.equipSet:SetFilter(filters.bagEquipSet, true)
+
 		f.consumable = MyContainer:New("Consumable", {Columns = bagsWidth, Parent = f.main})
 		f.consumable:SetFilter(filters.bagConsumable, true)
 
@@ -617,6 +621,9 @@ function module:OnLogin()
 
 		f.bagGoods = MyContainer:New("BagGoods", {Columns = bagsWidth, Parent = f.main})
 		f.bagGoods:SetFilter(filters.bagGoods, true)
+
+		f.bagQuest = MyContainer:New("BagQuest", {Columns = bagsWidth, Parent = f.main})
+		f.bagQuest:SetFilter(filters.bagQuest, true)
 
 		f.bank = MyContainer:New("Bank", {Columns = bankWidth, Bags = "bank"})
 		f.bank:SetFilter(filters.onlyBank, true)
@@ -635,6 +642,9 @@ function module:OnLogin()
 		f.bankEquipment = MyContainer:New("BankEquipment", {Columns = bankWidth, Parent = f.bank})
 		f.bankEquipment:SetFilter(filters.bankEquipment, true)
 
+		f.bankEquipSet = MyContainer:New("BankEquipSet", {Columns = bankWidth, Parent = f.bank})
+		f.bankEquipSet:SetFilter(filters.bankEquipSet, true)
+
 		f.bankConsumable = MyContainer:New("BankConsumable", {Columns = bankWidth, Parent = f.bank})
 		f.bankConsumable:SetFilter(filters.bankConsumable, true)
 
@@ -644,13 +654,16 @@ function module:OnLogin()
 		f.bankGoods = MyContainer:New("BankGoods", {Columns = bankWidth, Parent = f.bank})
 		f.bankGoods:SetFilter(filters.bankGoods, true)
 
+		f.bankQuest = MyContainer:New("BankQuest", {Columns = bankWidth, Parent = f.bank})
+		f.bankQuest:SetFilter(filters.bankQuest, true)
+
 		f.reagent = MyContainer:New("Reagent", {Columns = bankWidth})
 		f.reagent:SetFilter(filters.onlyReagent, true)
 		f.reagent:SetPoint("BOTTOMLEFT", f.bank)
 		f.reagent:Hide()
 
-		module.BagGroup = {f.azeriteItem, f.equipment, f.bagCompanion, f.bagGoods, f.consumable, f.bagFavourite, f.junk}
-		module.BankGroup = {f.bankAzeriteItem, f.bankEquipment, f.bankLegendary, f.bankCompanion, f.bankGoods, f.bankConsumable, f.bankFavourite}
+		module.BagGroup = {f.azeriteItem, f.equipment, f.equipSet, f.bagCompanion, f.bagGoods, f.consumable, f.bagQuest, f.bagFavourite, f.junk}
+		module.BankGroup = {f.bankAzeriteItem, f.bankEquipment, f.bankEquipSet, f.bankLegendary, f.bankCompanion, f.bankGoods, f.bankConsumable, f.bankQuest, f.bankFavourite}
 	end
 
 	local initBagType
@@ -711,6 +724,12 @@ function module:OnLogin()
 		end
 
 		self:HookScript("OnClick", module.ButtonOnClick)
+
+		if hasCanIMogIt then
+			self.canIMogIt = parentFrame:CreateTexture(nil, "OVERLAY")
+			self.canIMogIt:SetSize(13, 13)
+			self.canIMogIt:SetPoint(unpack(CanIMogIt.ICON_LOCATIONS[CanIMogItOptions["iconLocation"]]))
+		end
 	end
 
 	function MyButton:ItemOnEnter()
@@ -747,6 +766,27 @@ function module:OnLogin()
 			return "CosmeticIconFrame"
 		elseif C_Soulbinds_IsItemConduitByItemInfo(item.link) then
 			return "ConduitIconFrame", "ConduitIconFrame-Corners"
+		end
+	end
+
+	local function UpdateCanIMogIt(self, item)
+		if not self.canIMogIt then return end
+
+		local text, unmodifiedText = CanIMogIt:GetTooltipText(nil, item.bagID, item.slotID)
+		if text and text ~= "" then
+			local icon = CanIMogIt.tooltipOverlayIcons[unmodifiedText]
+			self.canIMogIt:SetTexture(icon)
+			self.canIMogIt:Show()
+		else
+			self.canIMogIt:Hide()
+		end
+	end
+
+	local function UpdatePawnArrow(self, item)
+		if not hasPawn then return end
+		if not PawnIsContainerItemAnUpgrade then return end
+		if self.UpgradeIcon then
+			self.UpgradeIcon:SetShown(PawnIsContainerItemAnUpgrade(item.bagID, item.slotID))
 		end
 	end
 
@@ -805,6 +845,17 @@ function module:OnLogin()
 		else
 			self:SetBackdropColor(.3, .3, .3, .3)
 		end
+
+		-- Hide empty tooltip
+		if not GetContainerItemInfo(item.bagID, item.slotID) then
+			GameTooltip:Hide()
+		end
+
+		-- Support CanIMogIt
+		UpdateCanIMogIt(self, item)
+
+		-- Support Pawn
+		UpdatePawnArrow(self, item)
 	end
 
 	function MyButton:OnUpdateQuest(item)
@@ -876,11 +927,9 @@ function module:OnLogin()
 		if strmatch(name, "AzeriteItem$") then
 			label = L["Azerite Armor"]
 		elseif strmatch(name, "Equipment$") then
-			if itemSetFilter then
-				label = L["Equipement Set"]
-			else
-				label = BAG_FILTER_EQUIPMENT
-			end
+			label = BAG_FILTER_EQUIPMENT
+		elseif strmatch(name, "EquipSet$") then
+			label = L["Equipement Set"]
 		elseif name == "BankLegendary" then
 			label = LOOT_JOURNAL_LEGENDARIES
 		elseif strmatch(name, "Consumable$") then
@@ -893,6 +942,8 @@ function module:OnLogin()
 			label = PREFERENCES
 		elseif strmatch(name, "Goods") then
 			label = AUCTION_CATEGORY_TRADE_GOODS
+		elseif strmatch(name, "Quest") then
+			label = QUESTS_LABEL
 		end
 		if label then
 			self.label = B.CreateFS(self, 14, label, true, "TOPLEFT", 5, -8)
@@ -981,10 +1032,6 @@ function module:OnLogin()
 
 	B:RegisterEvent("TRADE_SHOW", module.OpenBags)
 	B:RegisterEvent("TRADE_CLOSED", module.CloseBags)
-	if not DB.isNewPatch then
-		B:RegisterEvent("AUCTION_HOUSE_SHOW", module.OpenBags)
-		B:RegisterEvent("AUCTION_HOUSE_CLOSED", module.CloseBags)
-	end
 	B:RegisterEvent("BANKFRAME_OPENED", module.AutoDeposit)
 
 	-- Fixes

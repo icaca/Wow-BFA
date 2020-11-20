@@ -473,7 +473,7 @@ do
 		if self.__bgTex then return end
 
 		local frame = self
-		if self:GetObjectType() == "Texture" then frame = self:GetParent() end
+		if self:IsObjectType("Texture") then frame = self:GetParent() end
 
 		local tex = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
 		tex:SetAllPoints(self)
@@ -493,7 +493,7 @@ do
 		if self.__shadow then return end
 
 		local frame = self
-		if self:GetObjectType() == "Texture" then frame = self:GetParent() end
+		if self:IsObjectType("Texture") then frame = self:GetParent() end
 
 		shadowBackdrop.edgeSize = size or 5
 		self.__shadow = CreateFrame("Frame", nil, frame, "BackdropTemplate")
@@ -536,7 +536,7 @@ do
 	-- Handle frame
 	function B:CreateBDFrame(a, gradient)
 		local frame = self
-		if self:GetObjectType() == "Texture" then frame = self:GetParent() end
+		if self:IsObjectType("Texture") then frame = self:GetParent() end
 		local lvl = frame:GetFrameLevel()
 
 		local bg = CreateFrame("Frame", nil, frame, "BackdropTemplate")
@@ -653,7 +653,7 @@ do
 		self.__owner.bg:SetBackdropBorderColor(color.r, color.g, color.b)
 	end
 	local function updateIconBorderColor(self, r, g, b)
-		if (r==.65882 and g==.65882 and b==.65882) or (r>.99 and g>.99 and b>.99) then
+		if not r or (r==.65882 and g==.65882 and b==.65882) or (r>.99 and g>.99 and b>.99) then
 			r, g, b = 0, 0, 0
 		end
 		self.__owner.bg:SetBackdropBorderColor(r, g, b)
@@ -1458,7 +1458,6 @@ do
 		r = B:Round(r, 2)
 		g = B:Round(g, 2)
 		b = B:Round(b, 2)
-		print(r,g,b)
 		return r, g, b
 	end
 
