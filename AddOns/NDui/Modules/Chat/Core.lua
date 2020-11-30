@@ -35,10 +35,6 @@ function module:UpdateChatSize()
 	if ChatFrame1.FontStringContainer then
 		ChatFrame1.FontStringContainer:SetOutside(ChatFrame1)
 	end
-	if ChatFrame1:IsShown() then
-		ChatFrame1:Hide()
-		ChatFrame1:Show()
-	end
 	ChatFrame1:ClearAllPoints()
 	ChatFrame1:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 30)
 	ChatFrame1:SetWidth(C.db["Chat"]["ChatWidth"])
@@ -176,7 +172,19 @@ end
 hooksecurefunc("ChatEdit_CustomTabPressed", module.UpdateTabChannelSwitch)
 
 -- Quick Scroll
+local chatScrollInfo = {
+	text = L["ChatScrollHelp"],
+	buttonStyle = HelpTip.ButtonStyle.GotIt,
+	targetPoint = HelpTip.Point.RightEdgeCenter,
+	onAcknowledgeCallback = B.HelpInfoAcknowledge,
+	callbackArg = "ChatScroll",
+}
+
 function module:QuickMouseScroll(dir)
+	if not NDuiADB["Help"]["ChatScroll"] then
+		HelpTip:Show(ChatFrame1, chatScrollInfo)
+	end
+
 	if dir > 0 then
 		if IsShiftKeyDown() then
 			self:ScrollToTop()
@@ -305,7 +313,9 @@ function module:OnLogin()
 	fontOutline = C.db["Skins"]["FontOutline"] and "OUTLINE" or ""
 
 	for i = 1, NUM_CHAT_WINDOWS do
-		module.SkinChat(_G["ChatFrame"..i])
+		local chatframe = _G["ChatFrame"..i]
+		module.SkinChat(chatframe)
+		ChatFrame_RemoveMessageGroup(chatframe, "CHANNEL")
 	end
 
 	hooksecurefunc("FCF_OpenTemporaryWindow", function()
@@ -327,6 +337,7 @@ function module:OnLogin()
 	end
 
 	-- Default
+	if CHAT_OPTIONS then CHAT_OPTIONS.HIDE_FRAME_ALERTS = true end -- only flash whisper
 	SetCVar("chatStyle", "classic")
 	SetCVar("whisperMode", "inline") -- blizz reset this on NPE
 	B.HideOption(InterfaceOptionsSocialPanelChatStyle)
@@ -343,9 +354,10 @@ function module:OnLogin()
 
 	-- Lock chatframe
 	if C.db["Chat"]["Lock"] then
-		hooksecurefunc("FCF_SavePositionAndDimensions", module.UpdateChatSize)
-		B:RegisterEvent("UI_SCALE_CHANGED", module.UpdateChatSize)
 		module:UpdateChatSize()
+		B:RegisterEvent("UI_SCALE_CHANGED", module.UpdateChatSize)
+		hooksecurefunc("FCF_SavePositionAndDimensions", module.UpdateChatSize)
+		FCF_SavePositionAndDimensions(ChatFrame1)
 	end
 
 	-- ProfanityFilter

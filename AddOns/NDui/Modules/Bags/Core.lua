@@ -470,8 +470,8 @@ function module:CreateJunkButton()
 		else
 			bu.__turnOff()
 		end
-		self:GetScript("OnEnter")(self)
 		module:UpdateAllBags()
+		self:GetScript("OnEnter")(self)
 	end)
 	bu:SetScript("OnHide", bu.__turnOff)
 	bu.title = L["CustomJunkMode"]
@@ -616,8 +616,8 @@ function module:OnLogin()
 		f.consumable = MyContainer:New("Consumable", {Columns = bagsWidth, Parent = f.main})
 		f.consumable:SetFilter(filters.bagConsumable, true)
 
-		f.bagCompanion = MyContainer:New("BagCompanion", {Columns = bagsWidth, Parent = f.main})
-		f.bagCompanion:SetFilter(filters.bagMountPet, true)
+		f.bagCollection = MyContainer:New("BagCollection", {Columns = bagsWidth, Parent = f.main})
+		f.bagCollection:SetFilter(filters.bagCollection, true)
 
 		f.bagGoods = MyContainer:New("BagGoods", {Columns = bagsWidth, Parent = f.main})
 		f.bagGoods:SetFilter(filters.bagGoods, true)
@@ -648,8 +648,8 @@ function module:OnLogin()
 		f.bankConsumable = MyContainer:New("BankConsumable", {Columns = bankWidth, Parent = f.bank})
 		f.bankConsumable:SetFilter(filters.bankConsumable, true)
 
-		f.bankCompanion = MyContainer:New("BankCompanion", {Columns = bankWidth, Parent = f.bank})
-		f.bankCompanion:SetFilter(filters.bankMountPet, true)
+		f.bankCollection = MyContainer:New("BankCollection", {Columns = bankWidth, Parent = f.bank})
+		f.bankCollection:SetFilter(filters.bankCollection, true)
 
 		f.bankGoods = MyContainer:New("BankGoods", {Columns = bankWidth, Parent = f.bank})
 		f.bankGoods:SetFilter(filters.bankGoods, true)
@@ -662,8 +662,8 @@ function module:OnLogin()
 		f.reagent:SetPoint("BOTTOMLEFT", f.bank)
 		f.reagent:Hide()
 
-		module.BagGroup = {f.azeriteItem, f.equipment, f.equipSet, f.bagCompanion, f.bagGoods, f.consumable, f.bagQuest, f.bagFavourite, f.junk}
-		module.BankGroup = {f.bankAzeriteItem, f.bankEquipment, f.bankEquipSet, f.bankLegendary, f.bankCompanion, f.bankGoods, f.bankConsumable, f.bankQuest, f.bankFavourite}
+		module.BagGroup = {f.azeriteItem, f.equipment, f.equipSet, f.bagCollection, f.bagGoods, f.consumable, f.bagQuest, f.bagFavourite, f.junk}
+		module.BankGroup = {f.bankAzeriteItem, f.bankEquipment, f.bankEquipSet, f.bankLegendary, f.bankCollection, f.bankGoods, f.bankConsumable, f.bankQuest, f.bankFavourite}
 	end
 
 	local initBagType
@@ -762,7 +762,7 @@ function module:OnLogin()
 
 		if C_AzeriteEmpoweredItem_IsAzeriteEmpoweredItemByID(item.link) then
 			return "AzeriteIconFrame"
-		elseif IsCosmeticItem and IsCosmeticItem(item.link) then
+		elseif IsCosmeticItem(item.link) then
 			return "CosmeticIconFrame"
 		elseif C_Soulbinds_IsItemConduitByItemInfo(item.link) then
 			return "ConduitIconFrame", "ConduitIconFrame-Corners"
@@ -936,8 +936,8 @@ function module:OnLogin()
 			label = BAG_FILTER_CONSUMABLES
 		elseif name == "Junk" then
 			label = BAG_FILTER_JUNK
-		elseif strmatch(name, "Companion") then
-			label = MOUNTS_AND_PETS
+		elseif strmatch(name, "Collection") then
+			label = COLLECTIONS
 		elseif strmatch(name, "Favourite") then
 			label = PREFERENCES
 		elseif strmatch(name, "Goods") then

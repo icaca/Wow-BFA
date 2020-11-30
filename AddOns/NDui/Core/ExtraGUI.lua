@@ -107,22 +107,8 @@ function G:SetupRaidDebuffs(parent)
 		end
 	end
 
-	-- Deprecated, left them for SL prepatch
-	local bfaDungeons = {1023, 1022, 1030, 1002, 1012, 1021, 1001, 1041, 968, 1036, 1178}
-	for _, dungeonID in pairs(bfaDungeons) do
-		local name = EJ_GetInstanceInfo(dungeonID)
-		if name then
-			tinsert(dungeons, name)
-		end
-	end
-
 	local raids = {
-		[1] = EJ_GetInstanceInfo(1031),
-		[2] = EJ_GetInstanceInfo(1176),
-		[3] = EJ_GetInstanceInfo(1177),
-		[4] = EJ_GetInstanceInfo(1179),
-		[5] = EJ_GetInstanceInfo(1180),
-		[6] = EJ_GetInstanceInfo(1190),
+		[1] = EJ_GetInstanceInfo(1190),
 	}
 
 	options[1] = G:CreateDropdown(frame, DUNGEONS.."*", 120, -30, dungeons, L["Dungeons Intro"], 130, 30)
@@ -243,7 +229,7 @@ function G:SetupRaidDebuffs(parent)
 			self:SetText(prio)
 		end)
 		prioBox.title = L["Tips"]
-		B.AddTooltip(prioBox, "ANCHOR_RIGHT", L["Prio Editbox"], "info")
+		B.AddTooltip(prioBox, "ANCHOR_TOPRIGHT", L["Prio Editbox"], "info")
 		bar.prioBox = prioBox
 
 		return bar
@@ -697,7 +683,7 @@ function G:SetupBuffIndicator(parent)
 		scroll.box:SetPoint("TOPLEFT", 10, -10)
 		scroll.box:SetMaxLetters(6)
 		scroll.box.title = L["Tips"]
-		B.AddTooltip(scroll.box, "ANCHOR_RIGHT", L["ID Intro"], "info")
+		B.AddTooltip(scroll.box, "ANCHOR_TOPRIGHT", L["ID Intro"], "info")
 
 		scroll.add = B.CreateButton(frame, 45, 25, ADD)
 		scroll.add:SetPoint("TOPRIGHT", -8, -10)
@@ -735,7 +721,7 @@ function G:SetupBuffIndicator(parent)
 			showAll:SetHitRectInsets(0, 0, 0, 0)
 			showAll.bg:SetBackdropBorderColor(1, .8, 0, .5)
 			showAll.title = L["Tips"]
-			B.AddTooltip(showAll, "ANCHOR_RIGHT", L["ShowAllTip"], "info")
+			B.AddTooltip(showAll, "ANCHOR_TOPRIGHT", L["ShowAllTip"], "info")
 			scroll.showAll = showAll
 
 			for spellID, value in pairs(NDuiADB["CornerBuffs"][DB.MyClass]) do
@@ -1019,7 +1005,7 @@ function G:SetupBagFilter(parent)
 		[4] = "FilterEquipment",
 		[5] = "FilterEquipSet",
 		[6] = "FilterLegendary",
-		[7] = "FilterMount",
+		[7] = "FilterCollection",
 		[8] = "FilterFavourite",
 		[9] = "FilterGoods",
 		[10] = "FilterQuest",

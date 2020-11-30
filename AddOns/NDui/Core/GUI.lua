@@ -60,10 +60,10 @@ G.DefaultSettings = {
 
 		FilterJunk = true,
 		FilterConsumable = true,
-		FilterAzerite = true,
+		FilterAzerite = false,
 		FilterEquipment = true,
 		FilterLegendary = true,
-		FilterMount = true,
+		FilterCollection = true,
 		FilterFavourite = true,
 		FilterGoods = false,
 		FilterQuest = false,
@@ -296,6 +296,7 @@ G.DefaultSettings = {
 		AzeriteArmor = true,
 		OnlyArmorIcons = false,
 		ConduitInfo = true,
+		HideAllID = false,
 	},
 	Misc = {
 		Mail = true,
@@ -357,7 +358,7 @@ G.AccountSettings = {
 	GuildSortOrder = true,
 	DetectVersion = DB.Version,
 	ResetDetails = true,
-	LockUIScale = false,
+	LockUIScale = true,
 	UIScale = .71,
 	NumberFormat = 1,
 	VersionCheck = true,
@@ -374,7 +375,8 @@ G.AccountSettings = {
 	ContactList = {},
 	CustomJunkList = {},
 	ProfileIndex = {},
-	ProfileNames = {}
+	ProfileNames = {},
+	Help = {},
 }
 
 -- Initial settings
@@ -735,7 +737,7 @@ G.TabList = {
 	L["Tooltip"],
 	L["Misc"],
 	L["UI Settings"],
-	NewFeatureTag..L["Profile"],
+	L["Profile"],
 }
 
 G.OptionList = { -- type, key, value, name, horizon, doubleline
@@ -775,7 +777,7 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{1, "Bags", "BagsiLvl", L["Bags Itemlevel"].."*", nil, nil, updateBagStatus},
 		{1, "Bags", "ShowNewItem", L["Bags ShowNewItem"], true},
 		{3, "Bags", "iLvlToShow", L["iLvlToShow"].."*", nil, {1, 500, 1}, nil, L["iLvlToShowTip"]},
-		{4, "Bags", "BagSortMode", L["BagSortMode"].."*", true, {L["Forward"], L["Backward"], DISABLE}, updateBagSortOrder},
+		{4, "Bags", "BagSortMode", L["BagSortMode"].."*", true, {L["Forward"], L["Backward"], DISABLE}, updateBagSortOrder, L["BagSortTip"]},
 		{},--blank
 		{3, "Bags", "BagsScale", L["Bags Scale"], false, {.5, 1.5, .1}},
 		{3, "Bags", "IconSize", L["Bags IconSize"], true, {30, 42, 1}},
@@ -797,7 +799,7 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{1, "UFs", "RuneTimer", L["UFs RuneTimer"], true},
 		{1, "UFs", "PlayerDebuff", L["Player Debuff"]},
 		{1, "UFs", "ToTAuras", L["ToT Debuff"], true},
-		{4, "UFs", "HealthColor", L["HealthColor"], nil, {L["Default Dark"], L["ClassColorHP"], L["GradientHP"]}},
+		{4, "UFs", "HealthColor", L["HealthColor"].."*", nil, {L["Default Dark"], L["ClassColorHP"], L["GradientHP"]}, updateUFTextScale},
 		{3, "UFs", "TargetAurasPerRow", L["TargetAurasPerRow"].."*", true, {5, 10, 1}, updateTargetFrameAuras},
 		{3, "UFs", "UFTextScale", L["UFTextScale"].."*", nil, {.8, 1.5, .05}, updateUFTextScale},
 		{3, "UFs", "SmoothAmount", HeaderTag..L["SmoothAmount"].."*", true, {.15, .6, .05}, updateSmoothingAmount, L["SmoothAmountTip"]},
@@ -838,7 +840,7 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{3, "UFs", "HealthFrequency", L["HealthFrequency"].."*", true, {.02, .2, .01}, updateRaidHealthMethod, L["HealthFrequencyTip"]},
 		{3, "UFs", "NumGroups", L["Num Groups"], nil, {4, 8, 1}},
 		{3, "UFs", "RaidTextScale", L["UFTextScale"].."*", true, {.8, 1.5, .05}, updateRaidTextScale},
-		{4, "UFs", "RaidHealthColor", L["HealthColor"], nil, {L["Default Dark"], L["ClassColorHP"], L["GradientHP"]}},
+		{4, "UFs", "RaidHealthColor", L["HealthColor"].."*", nil, {L["Default Dark"], L["ClassColorHP"], L["GradientHP"]}, updateRaidTextScale},
 		{4, "UFs", "RaidHPMode", L["RaidHPMode"].."*", true, {L["DisableRaidHP"], L["RaidHPPercent"], L["RaidHPCurrent"], L["RaidHPLost"]}, updateRaidNameText},
 		{},--blank
 		{1, "UFs", "SimpleMode", HeaderTag..L["SimpleRaidFrame"], nil, nil, nil, L["SimpleRaidFrameTip"]},
@@ -1025,6 +1027,7 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{1, "Tooltip", "SpecLevelByShift", L["Show SpecLevelByShift"].."*", true},
 		{1, "Tooltip", "LFDRole", L["Group Roles"].."*"},
 		{1, "Tooltip", "TargetBy", L["Show TargetedBy"].."*", true},
+		{1, "Tooltip", "HideAllID", "|cffff0000"..L["HideAllID"]},
 		{},--blank
 		{1, "Tooltip", "AzeriteArmor", HeaderTag..L["Show AzeriteArmor"]},
 		{1, "Tooltip", "OnlyArmorIcons", L["Armor icons only"].."*", true},
@@ -1241,6 +1244,10 @@ local function CreateOption(i)
 			end
 
 			B.CreateFS(dd, 14, name, "system", "CENTER", 0, 25)
+			if tooltip then
+				dd.title = L["Tips"]
+				B.AddTooltip(dd, "ANCHOR_RIGHT", tooltip, "info")
+			end
 		-- Colorswatch
 		elseif optType == 5 then
 			local f = B.CreateColorSwatch(parent, name, NDUI_VARIABLE(key, value))
@@ -1326,6 +1333,15 @@ local function scrollBarHook(self, delta)
 	scrollBar:SetValue(scrollBar:GetValue() - delta*35)
 end
 
+StaticPopupDialogs["RELOAD_NDUI"] = {
+	text = L["ReloadUI Required"],
+	button1 = APPLY,
+	button2 = CLASS_TRIAL_THANKS_DIALOG_CLOSE_BUTTON,
+	OnAccept = function()
+		ReloadUI()
+	end,
+}
+
 local function OpenGUI()
 	if f then f:Show() return end
 
@@ -1341,14 +1357,14 @@ local function OpenGUI()
 	B.CreateFS(f, 18, L["NDui Console"], true, "TOP", 0, -10)
 	B.CreateFS(f, 16, DB.Version.." ("..DB.Support..")", false, "TOP", 0, -30)
 
-	local contact = B.CreateButton(f, 130, 20, L["Contact"])
+	local contact = B.CreateButton(f, 130, 20, NewFeatureTag..L["Contact"])
 	contact:SetPoint("BOTTOMLEFT", 20, 15)
 	contact:SetScript("OnClick", function()
 		f:Hide()
 		G:AddContactFrame()
 	end)
 
-	local unlock = B.CreateButton(f, 130, 20, L["UnlockUI"])
+	local unlock = B.CreateButton(f, 130, 20, NewFeatureTag..L["UnlockUI"])
 	unlock:SetPoint("BOTTOM", contact, "TOP", 0, 2)
 	unlock:SetScript("OnClick", function()
 		f:Hide()

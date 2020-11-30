@@ -57,7 +57,6 @@ function M:OnLogin()
 	M:TradeTargetInfo()
 	M:MoveQuestTracker()
 	M:BlockStrangerInvite()
-	M:OverrideAWQ()
 	M:ToggleBossBanner()
 	M:ToggleBossEmote()
 
@@ -323,28 +322,6 @@ function M:BlockStrangerInvite()
 	end)
 end
 
--- Override default settings for AngryWorldQuests
-function M:OverrideAWQ()
-	if not IsAddOnLoaded("AngryWorldQuests") then return end
-
-	AngryWorldQuests_Config = AngryWorldQuests_Config or {}
-	AngryWorldQuests_CharacterConfig = AngryWorldQuests_CharacterConfig or {}
-
-	local settings = {
-		hideFilteredPOI = true,
-		showContinentPOI = true,
-		sortMethod = 2,
-	}
-	local function overrideOptions(_, key)
-		local value = settings[key]
-		if value then
-			AngryWorldQuests_Config[key] = value
-			AngryWorldQuests_CharacterConfig[key] = value
-		end
-	end
-	hooksecurefunc(AngryWorldQuests.Modules.Config, "Set", overrideOptions)
-end
-
 -- Archaeology counts
 do
 	local function CalculateArches(self)
@@ -427,11 +404,16 @@ do
 		end
 	end)
 
-	local count = 0
-	PlayerPowerBarAlt:HookScript("OnEnter", function()
-		if count < 5 then
-			UIErrorsFrame:AddMessage(DB.InfoColor..L["Drag AltBar Tip"])
-			count = count + 1
+	local altPowerInfo = {
+		text = L["Drag AltBar Tip"],
+		buttonStyle = HelpTip.ButtonStyle.GotIt,
+		targetPoint = HelpTip.Point.RightEdgeCenter,
+		onAcknowledgeCallback = B.HelpInfoAcknowledge,
+		callbackArg = "AltPower",
+	}
+	PlayerPowerBarAlt:HookScript("OnEnter", function(self)
+		if not NDuiADB["Help"]["AltPower"] then
+			HelpTip:Show(self, altPowerInfo)
 		end
 	end)
 end
