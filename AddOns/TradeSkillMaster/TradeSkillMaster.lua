@@ -171,6 +171,21 @@ function TSM.OnInitialize()
 		CustomPrice.RegisterSource("External", "AHDBMinBid", L["AHDB Minimum Bid"], GetAHDBPrice, true, "minBid")
 	end
 
+	-- RECrystallize price sources
+	if Wow.IsAddonEnabled("RECrystallize") and RECrystallize and RECrystallize_PriceCheck then
+		hooksecurefunc("RECrystallize_PriceCheck", function()
+		CustomPrice.OnSourceChange("RECDB")
+		end)
+		local function GetRECPrice(itemLink, arg)
+			local price, timestamp, match = RECrystallize_PriceCheck(itemLink)
+			return price
+		end
+		local function Unknown(itemLink, arg)
+			return 0
+		end
+		CustomPrice.RegisterSource("External", "RECDB", "RECrystallize", GetRECPrice, true, "recdb")
+		end
+
 	-- module price sources
 	CustomPrice.RegisterSource("Accounting", "AvgSell", L["Avg Sell Price"], TSM.Accounting.Transactions.GetAverageSalePrice)
 	CustomPrice.RegisterSource("Accounting", "MaxSell", L["Max Sell Price"], TSM.Accounting.Transactions.GetMaxSalePrice)
