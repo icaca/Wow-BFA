@@ -610,8 +610,9 @@ function AuctionDB(data,his,date)
       end
    end 
    -- print(6,sum/count,count,time(),Amount)
-   table.insert(his, {["Price"]= math.floor(sum/count),["Amount"]= Amount,["LastSeen"]= date})            
-   return calcMarketPriceByMultipleVals(his),Amount
+   _his = table.shallow_copy(his)
+   table.insert(_his, {["Price"]= math.floor(sum/count),["Amount"]= Amount,["LastSeen"]= date})            
+   return calcMarketPriceByMultipleVals(_his),Amount
 end
 
 
