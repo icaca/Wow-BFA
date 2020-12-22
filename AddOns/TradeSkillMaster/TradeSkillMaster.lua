@@ -177,13 +177,11 @@ function TSM.OnInitialize()
 		CustomPrice.OnSourceChange("RECDB")
 		end)
 		local function GetRECPrice(itemLink, arg)
-			local price, timestamp, match = RECrystallize_PriceCheck(itemLink)
+			local price, timestamp, match = RECrystallize_PriceCheck(itemLink, arg)
 			return price
 		end
-		local function Unknown(itemLink, arg)
-			return 0
-		end
-		CustomPrice.RegisterSource("External", "RECDB", "RECrystallize", GetRECPrice, true, "recdb")
+		CustomPrice.RegisterSource("External", "RECDBPrice", "AuctionDB算法计算", GetRECPrice, true, "Price")
+		CustomPrice.RegisterSource("External", "RECDBAmount", "数量", GetRECPrice, true, "Amount")
 		end
 
 	-- module price sources

@@ -33,7 +33,7 @@ local ElvUI = _G.ElvUI
 
 local PETCAGEID = 82800
 
-RE.DefaultConfig = {["LastScan"] = 0, ["GuildChatPC"] = false, ["DatabaseCleanup"] = 432000, ["AlwaysShowAll"] = false, ["DatabaseVersion"] = 1}
+RE.DefaultConfig = {["LastScan"] = 0, ["GuildChatPC"] = true, ["DatabaseCleanup"] = 432000, ["AlwaysShowAll"] = false, ["DatabaseVersion"] = 1}
 RE.GUIInitialized = false
 RE.RecipeLock = false
 RE.ScanFinished = false
@@ -86,45 +86,43 @@ function RE:OnEvent(self, event, ...)
 		RE:Scan()
 	elseif event == "CHAT_MSG_GUILD" then
 		local msg = ...
-		if sMatch(msg, "^!!!") then
-			local itemID, itemStr = 0, ""
-			if IsLinkType(msg, "item") then
-				itemID = tonumber(sMatch(msg, "item:(%d+)"))
-				itemStr = RE:GetItemString(msg)
-			elseif IsLinkType(msg, "battlepet") then
-				itemID = PETCAGEID
-				itemStr = RE:GetPetString(msg)
+		local itemID, itemStr = 0, ""
+		if IsLinkType(msg, "item") then
+			itemID = tonumber(sMatch(msg, "item:(%d+)"))
+			itemStr = RE:GetItemString(msg)
+		elseif IsLinkType(msg, "battlepet") then
+			itemID = PETCAGEID
+			itemStr = RE:GetPetString(msg)
+		end
+		if RE.DB[RE.RealmString][itemID] ~= nil then
+			local suffix = ""
+			if RE.DB[RE.RealmString][itemID][itemStr] == nil then
+				itemStr = RE:GetCheapestVariant(RE.DB[RE.RealmString][itemID])
+				suffix = " - 部分匹配!"
 			end
-			if RE.DB[RE.RealmString][itemID] ~= nil then
-				local suffix = ""
-				if RE.DB[RE.RealmString][itemID][itemStr] == nil then
-					itemStr = RE:GetCheapestVariant(RE.DB[RE.RealmString][itemID])
-					suffix = " - Partial match!"
+			if RE.DB[RE.RealmString][itemID][itemStr] ~= nil then
+				local pc = "[caca]"
+				local price = RE.DB[RE.RealmString][itemID][itemStr].Price
+				local scanTime = Round((time() - RE.DB[RE.RealmString][itemID][itemStr].LastSeen) / 60 / 60)
+				local g = floor(price / 100 / 100)
+				local s = floor((price / 100) % 100)
+				if g > 0 then
+					pc = pc.." "..FormatLargeNumber(g).."G"
 				end
-				if RE.DB[RE.RealmString][itemID][itemStr] ~= nil then
-					local pc = "[PC]"
-					local price = RE.DB[RE.RealmString][itemID][itemStr].Price
-					local scanTime = Round((time() - RE.DB[RE.RealmString][itemID][itemStr].LastSeen) / 60 / 60)
-					local g = floor(price / 100 / 100)
-					local s = floor((price / 100) % 100)
-					if g > 0 then
-						pc = pc.." "..FormatLargeNumber(g).."g"
-					end
-					if s > 0 then
-						pc = pc.." "..s.."s"
-					end
-					if scanTime > 0 then
-						pc = pc.." - Data is "..scanTime.."h old"
-					else
-						pc = pc.." - Data is <1h old"
-					end
-					SendChatMessage(pc..suffix, "GUILD")
+				if s > 0 then
+					pc = pc.." "..s.."秒"
+				end
+				if scanTime > 0 then
+					pc = pc.." - 日期是 "..scanTime.."小时"
 				else
-					SendChatMessage("[PC] Never seen it on AH.", "GUILD")
+					pc = pc.." - 小于一小时"
 				end
+				SendChatMessage(pc..suffix, "GUILD")
 			else
-				SendChatMessage("[PC] Never seen it on AH.", "GUILD")
+				-- SendChatMessage("[PC] 没见过", "GUILD")
 			end
+		else
+			-- SendChatMessage("[PC] 没见过", "GUILD")
 		end
 	elseif event == "AUCTION_HOUSE_SHOW" then
 		if not RE.GUIInitialized then
@@ -154,7 +152,7 @@ function RE:OnEvent(self, event, ...)
 			end
 			RE.AHButton.frame:Show()
 		end
-		if time() - RE.Config.LastScan > 1200 then
+		if time() - RE.Config.LastScan > 15*60 then
 			RE.AHButton:SetText(L["Start scan"])
 			RE.AHButton:SetDisabled(false)
 		else
@@ -223,7 +221,7 @@ function RE:OnEvent(self, event, ...)
 				description = {
 					type = "description",
 					name = function(_)
-						local timeLeft = 1200 - (time() - RE.Config.LastScan)
+						local timeLeft = 15*60 - (time() - RE.Config.LastScan)
 						local timeString = timeLeft > 0 and SecondsToTime(timeLeft) or L["Now"]
 						local timeLast = GetCVar("portal") == "US" and date("%I:%M %p %m/%d/%y", RE.Config.LastScan) or date("%H:%M %d.%m.%y", RE.Config.LastScan)
 						local s = L["Previous scan"]..": "..timeLast.."\n"..L["Next scan available in"]..": "..timeString.."\n\n"..L["Items in database"]..":\n"
@@ -371,7 +369,7 @@ function RE:Scan()
 			if link then
 				progress = progress + 1
 				RE.AHButton:SetText(progress.." / "..num)
-				RE.DBScan[i] = {["Price"] = price / count, ["ItemID"] = itemID, ["ItemLink"] = link, ["Quality"] = quality}
+				RE.DBScan[i] = {["Price"] = price / count, ["Amount"] = count, ["ItemID"] = itemID, ["ItemLink"] = link, ["Quality"] = quality}
 			end
 		else
 			local item = Item:CreateFromItemID(itemID)
@@ -385,7 +383,7 @@ function RE:Scan()
 					if link then
 						progress = progress + 1
 						RE.AHButton:SetText(progress.." / "..num)
-						RE.DBScan[i] = {["Price"] = price / count, ["ItemID"] = itemID, ["ItemLink"] = link, ["Quality"] = quality}
+						RE.DBScan[i] = {["Price"] = price / count, ["Amount"] = count, ["ItemID"] = itemID, ["ItemLink"] = link, ["Quality"] = quality}
 					end
 				end
 				if not next(inProgress) then
@@ -433,13 +431,10 @@ function RE:ParseDatabase()
 			if RE.DBTemp[offer.ItemID] == nil then
 				RE.DBTemp[offer.ItemID] = {}
 			end
-			if RE.DBTemp[offer.ItemID][itemStr] ~= nil then
-				if offer.Price < RE.DBTemp[offer.ItemID][itemStr] then
-					RE.DBTemp[offer.ItemID][itemStr] = offer.Price
-				end
-			else
-				RE.DBTemp[offer.ItemID][itemStr] = offer.Price
+			if RE.DBTemp[offer.ItemID][itemStr] == nil then			
+				RE.DBTemp[offer.ItemID][itemStr] = {Data = {}}
 			end
+            table.insert(RE.DBTemp[offer.ItemID][itemStr].Data, offer)			
 		end
 	end
 end
@@ -450,14 +445,25 @@ function RE:SyncDatabase()
 			RE.DB[RE.RealmString][itemID] = {}
 		end
 		for variant, _ in pairs(RE.DBTemp[itemID]) do
+			local His = nil
 			if RE.DB[RE.RealmString][itemID][variant] ~= nil then
 				if RE.DBTemp[itemID][variant] ~= RE.DB[RE.RealmString][itemID][variant].Price then
 					RE.ScanStats[2] = RE.ScanStats[2] + 1
 				end
+				His = RE.DB[RE.RealmString][itemID][variant].His
 			else
 				RE.ScanStats[1] = RE.ScanStats[1] + 1
 			end
-			RE.DB[RE.RealmString][itemID][variant] = {["Price"] = RE.DBTemp[itemID][variant], ["LastSeen"] = RE.Config.LastScan}
+			if His == nil then
+				His = {}
+			end
+
+			local Price, Amount = AuctionDB(RE.DBTemp[itemID][variant].Data, His, RE.Config.LastScan)
+			
+			table.insert(
+			His,{["Price"]= Price, ["Amount"]= Amount , ["LastSeen"]= RE.Config.LastScan})
+						   
+			RE.DB[RE.RealmString][itemID][variant] = {["Price"]= Price, ["Amount"]= Amount , ["LastSeen"]= RE.Config.LastScan, ["His"] = His}
 		end
 	end
 end
@@ -484,11 +490,11 @@ function RE:GetPetString(link)
 	return TSM_API.ToItemString(link)
 end
 
-function RE:GetCheapestVariant(items)
+function RE:GetCheapestVariant(items,arg)
 	local target, lowest
 	for variant, data in pairs(items) do
-		if not lowest or data.Price < lowest then
-			lowest = data.Price
+		if not lowest or data[arg] < lowest then
+			lowest = data[arg]
 			target = variant
 		end
 	end
@@ -497,11 +503,116 @@ end
 
 -- API
 
-function RECrystallize_PriceCheck(link)
+
+--[[
+计算数据权重
+@param {number}deltaTime 上次扫描时间距离现在的时间差（单位:s）
+@param {number}goodsNum 物品数量
+]]
+function calcWeight(deltaTime, goodsNum)
+   local t,nums = deltaTime/24/3600,goodsNum+3
+   weight =  (nums-nums^(t/(t-2/(log(nums/2)/log(0.5)))))/nums;
+   -- print(weight)
+   return weight
+end
+--[[
+根据新旧价格计算市场参考价
+@param {number}currentPrice 当前参考均价
+@param {number}lastPrice 上次计算的市场参考价
+@param {number}deltaTime 上次扫描时间距离现在的时间差（单位:s）
+@param {number}goodsNum 物品数量
+]]
+function calcMarketPrice(currentPrice, lastPrice, deltaTime, goodsNum) 
+   local weight = calcWeight(deltaTime, goodsNum);
+   return (1-weight)*currentPrice + weight * lastPrice;
+end
+--[[
+根据多天的价格计算市场参考价
+入参{{price1, count1, scanTime1},{price2, count2, scanTime2},......}
+数据按从老到新的顺序排列
+]]
+function calcMarketPriceByMultipleVals(priceArr)
+   local weightArr;
+   local totalWeight = 0;
+   local totalPrice = 0;   
+   for i, item in pairs(priceArr) do
+      -- print(item.Price,item.Amount,item.LastSeen)
+      weightArr = calcWeight(time() - item.LastSeen, item.Amount);
+      totalWeight = totalWeight + weightArr;
+      totalPrice = totalPrice + weightArr * item.Price;
+   end   
+   return math.floor(totalPrice / totalWeight);
+end
+
+function AuctionDB(data,his,date)
+   -- print("Start")
+   if data == nil or #data ==0 then 
+      return nil
+   end 
+   local Amount, Min30, tmpcnt, Total  = 0, 0, 0, 0
+   
+   table.sort(data,
+      function(a, b) return a.Price < b.Price end)
+   
+   for _, item in pairs(data) do
+      Amount = Amount + item.Amount
+   end
+   Min30 = math.floor(Amount * 0.3)
+   if Min30 < 1 then Min30 = 1 end
+   
+   -- print(1,Amount , Min30)
+   local t,Count= {},0
+   
+   for _, item in pairs(data) do
+      if Count  >= Min30 then
+         break
+      end
+      if tmpcnt + item.Amount > Min30 then
+         item.Amount =(Min30 - Count)
+      end
+      table.insert(t,item)    
+      
+      Total =Total + item.Price * item.Amount
+      Count = Count + item.Amount
+      -- print(2,item.Price , item.Amount, Min30)
+   end
+   
+   avg = Total / Min30
+   
+   -- print(3,Total,Min30,avg)
+   
+   local p=2  
+   local b  = 0
+   for k,item in pairs(t) do --计算方差 
+      v = item.Price      
+      for i = 1, item.Amount do
+         b=b+((v-avg)^p)  
+      end
+   end  
+   b=(b/Min30)^0.5  --总体标准偏差  
+   -- print(4,b,#t)
+   local sum,count, c = 0,0,nil  
+   for k,item in pairs(t) do   --归一化,范围-1.5 —— 1.5 之间  
+      v= item.Price
+      c=(v-avg)/b  
+      if c>=-1.5 and c<=1.5 then
+         sum =sum+v*item.Amount
+         count = count +item.Amount
+         -- print(5,k,v,c,b,item.Amount)
+      end
+   end 
+   -- print(6,sum/count,count,time(),Amount)
+   table.insert(his, {["Price"]= math.floor(sum/count),["Amount"]= Amount,["LastSeen"]= date})            
+   return calcMarketPriceByMultipleVals(his),Amount
+end
+
+
+function RECrystallize_PriceCheck(link,arg)
 	if link then
 		local itemID
 		local variant
 		local partial = false
+		local field = arg or "Price"
 
 		if IsLinkType(link, "item") then
 			itemID = tonumber(sMatch(link, "item:(%d+)"))
@@ -519,7 +630,7 @@ function RECrystallize_PriceCheck(link)
 				partial = true
 			end
 			if RE.DB[RE.RealmString][itemID][variant] ~= nil then
-				return RE.DB[RE.RealmString][itemID][variant].Price, RE.DB[RE.RealmString][itemID][variant].LastSeen, partial
+				return RE.DB[RE.RealmString][itemID][variant][arg], RE.DB[RE.RealmString][itemID][variant].LastSeen, partial
 			end
 		end
 	end

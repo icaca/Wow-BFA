@@ -16,7 +16,7 @@ L["Scan unavailable"] = "扫描不可用"
 L["Start scan"] = "开始扫描"
 L["The number of days after which old data will be deleted."] = "在指定天数前的旧数据将被删除。"
 L["Updated items"] = "更新物品"
-L["Waiting..."] = "等待中..."
+L["Waiting..."] = "等待中..."
 L["WARNING! This operation is not reversible!"] = "警告！此操作不可逆！"
 L["When enabled the functionality of the SHIFT button will be swapped."] = "启用后，SHIFT键的功能将被交换。"
 
