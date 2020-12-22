@@ -45,6 +45,14 @@ RE.TooltipItemID = 0
 RE.TooltipCount = 0
 RE.TooltipCustomCount = -1
 
+function table.shallow_copy(t)
+  local t2 = {}
+  for k,v in pairs(t) do
+    t2[k] = v
+  end
+  return t2
+end
+
 local function tCount(table)
 	local count = 0
 	for _ in pairs(table) do
@@ -450,7 +458,7 @@ function RE:SyncDatabase()
 				if RE.DBTemp[itemID][variant] ~= RE.DB[RE.RealmString][itemID][variant].Price then
 					RE.ScanStats[2] = RE.ScanStats[2] + 1
 				end
-				His = RE.DB[RE.RealmString][itemID][variant].His
+				His = table.shallow_copy(RE.DB[RE.RealmString][itemID][variant].His)
 			else
 				RE.ScanStats[1] = RE.ScanStats[1] + 1
 			end

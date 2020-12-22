@@ -37,7 +37,7 @@ local APP_INFO_REQUIRED_KEYS = { "version", "lastSync", "message", "news" }
 local LOGOUT_TIME_WARNING_THRESHOLD_MS = 20
 do
 	-- show a message if we were updated
-	if GetAddOnMetadata("TradeSkillMaster", "Version") ~= "v4.10.25" then
+	if GetAddOnMetadata("TradeSkillMaster", "Version") ~= "v4.10.26" then
 		Wow.ShowBasicMessage("TSM was just updated and may not work properly until you restart WoW.")
 	end
 end
@@ -170,7 +170,7 @@ function TSM.OnInitialize()
 		CustomPrice.RegisterSource("External", "AHDBMinBuyout", L["AHDB Minimum Buyout"], GetAHDBPrice, true, "minBuyout")
 		CustomPrice.RegisterSource("External", "AHDBMinBid", L["AHDB Minimum Bid"], GetAHDBPrice, true, "minBid")
 	end
-
+	
 	-- RECrystallize price sources
 	if Wow.IsAddonEnabled("RECrystallize") and RECrystallize and RECrystallize_PriceCheck then
 		hooksecurefunc("RECrystallize_PriceCheck", function()
@@ -182,7 +182,7 @@ function TSM.OnInitialize()
 		end
 		CustomPrice.RegisterSource("External", "RECDBPrice", "AuctionDB算法计算", GetRECPrice, true, "Price")
 		CustomPrice.RegisterSource("External", "RECDBAmount", "数量", GetRECPrice, true, "Amount")
-		end
+	end
 
 	-- module price sources
 	CustomPrice.RegisterSource("Accounting", "AvgSell", L["Avg Sell Price"], TSM.Accounting.Transactions.GetAverageSalePrice)
