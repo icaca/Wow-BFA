@@ -45,12 +45,10 @@ RE.TooltipItemID = 0
 RE.TooltipCount = 0
 RE.TooltipCustomCount = -1
 
-function table.shallow_copy(t)
-  local t2 = {}
-  for k,v in pairs(t) do
-    t2[k] = v
-  end
-  return t2
+table.clone = table.clone or function(t)
+    local result = {}
+    for i = 1, #t do result[i] = t[i] end
+    return result
 end
 
 local function tCount(table)
@@ -458,7 +456,7 @@ function RE:SyncDatabase()
 				if RE.DBTemp[itemID][variant] ~= RE.DB[RE.RealmString][itemID][variant].Price then
 					RE.ScanStats[2] = RE.ScanStats[2] + 1
 				end
-				His = table.shallow_copy(RE.DB[RE.RealmString][itemID][variant].His)
+				His = RE.DB[RE.RealmString][itemID][variant].His
 			else
 				RE.ScanStats[1] = RE.ScanStats[1] + 1
 			end
@@ -468,8 +466,7 @@ function RE:SyncDatabase()
 
 			local Price, Amount = AuctionDB(RE.DBTemp[itemID][variant].Data, His, RE.Config.LastScan)
 			
-			table.insert(
-			His,{["Price"]= Price, ["Amount"]= Amount , ["LastSeen"]= RE.Config.LastScan})
+			table.insert(His,{["Price"]= Price, ["Amount"]= Amount , ["LastSeen"]= RE.Config.LastScan})
 						   
 			RE.DB[RE.RealmString][itemID][variant] = {["Price"]= Price, ["Amount"]= Amount , ["LastSeen"]= RE.Config.LastScan, ["His"] = His}
 		end
@@ -610,7 +607,7 @@ function AuctionDB(data,his,date)
       end
    end 
    -- print(6,sum/count,count,time(),Amount)
-   _his = table.shallow_copy(his)
+   _his = table.clone(his)
    table.insert(_his, {["Price"]= math.floor(sum/count),["Amount"]= Amount,["LastSeen"]= date})            
    return calcMarketPriceByMultipleVals(_his),Amount
 end
