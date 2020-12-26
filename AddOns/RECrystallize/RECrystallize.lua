@@ -158,7 +158,7 @@ function RE:OnEvent(self, event, ...)
 			end
 			RE.AHButton.frame:Show()
 		end
-		if time() - RE.Config.LastScan > 15*60 then
+		if time() - RE.Config.LastScan > 60 then
 			RE.AHButton:SetText(L["Start scan"])
 			RE.AHButton:SetDisabled(false)
 		else
@@ -227,7 +227,7 @@ function RE:OnEvent(self, event, ...)
 				description = {
 					type = "description",
 					name = function(_)
-						local timeLeft = 15*60 - (time() - RE.Config.LastScan)
+						local timeLeft = 60 - (time() - RE.Config.LastScan)
 						local timeString = timeLeft > 0 and SecondsToTime(timeLeft) or L["Now"]
 						local timeLast = GetCVar("portal") == "US" and date("%I:%M %p %m/%d/%y", RE.Config.LastScan) or date("%H:%M %d.%m.%y", RE.Config.LastScan)
 						local s = L["Previous scan"]..": "..timeLast.."\n"..L["Next scan available in"]..": "..timeString.."\n\n"..L["Items in database"]..":\n"
@@ -608,8 +608,8 @@ function AuctionDB(data,his,date)
    end 
    -- print(6,sum/count,count,time(),Amount)
    _his = table.clone(his)
-   table.insert(_his, {["Price"]= math.floor(sum/count),["Amount"]= Amount,["LastSeen"]= date})            
-   return calcMarketPriceByMultipleVals(_his),Amount
+   table.insert(_his, {["Price"]= math.floor(sum/count),["Amount"]= Amount,["LastSeen"]= date})       return math.floor(sum/count),Amount
+   -- return calcMarketPriceByMultipleVals(_his),Amount
 end
 
 

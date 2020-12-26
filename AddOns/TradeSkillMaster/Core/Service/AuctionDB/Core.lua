@@ -346,6 +346,8 @@ function private.CalculateItemMarketValue(itemBuyouts, quantity)
 	local prevItemBuyout = 0
 	for i = 1, midBucketNum do
 		local itemBuyout = itemBuyouts[i]
+		print(itemBuyout,quantity)
+		
 		if num < lowBucketNum or itemBuyout < prevItemBuyout * 1.2 then
 			num = num + 1
 			total = total + itemBuyout

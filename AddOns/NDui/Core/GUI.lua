@@ -12,7 +12,6 @@ G.DefaultSettings = {
 	Mover = {},
 	InternalCD = {},
 	AuraWatchMover = {},
-	RaidClickSets = {},
 	TempAnchor = {},
 	AuraWatchList = {
 		Switcher = {},
@@ -338,6 +337,7 @@ G.DefaultSettings = {
 		BlockInvite = false,
 		NzothVision = true,
 		SendActionCD = false,
+		MawThreatBar = true,
 	},
 	Tutorial = {
 		Complete = false,
@@ -367,6 +367,7 @@ G.AccountSettings = {
 	BWRequest = false,
 	RaidAuraWatch = {},
 	CornerBuffs = {},
+	RaidClickSets = {},
 	TexStyle = 2,
 	KeystoneInfo = {},
 	AutoBubbles = false,
@@ -897,9 +898,9 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{1, "Nameplate", "PPGCDTicker", L["PlayerPlate GCDTicker"].."*", nil, nil, toggleGCDTicker},
 		{},--blank
 		{3, "Nameplate", "PPWidth", L["PlayerPlate HPWidth"].."*", false, {150, 300, 1}, refreshNameplates},
-		{3, "Nameplate", "PPBarHeight", L["PlayerPlate CPHeight"].."*", true, {5, 15, 1}, refreshNameplates},
-		{3, "Nameplate", "PPHealthHeight", L["PlayerPlate HPHeight"].."*", false, {5, 15, 1}, refreshNameplates},
-		{3, "Nameplate", "PPPowerHeight", L["PlayerPlate MPHeight"].."*", true, {5, 15, 1}, refreshNameplates},
+		{3, "Nameplate", "PPBarHeight", L["PlayerPlate CPHeight"].."*", true, {2, 15, 1}, refreshNameplates},
+		{3, "Nameplate", "PPHealthHeight", L["PlayerPlate HPHeight"].."*", false, {2, 15, 1}, refreshNameplates},
+		{3, "Nameplate", "PPPowerHeight", L["PlayerPlate MPHeight"].."*", true, {2, 15, 1}, refreshNameplates},
 	},
 	[7] = {
 		{1, "AuraWatch", "Enable", HeaderTag..L["Enable AuraWatch"], nil, setupAuraWatch},
@@ -1053,6 +1054,7 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{1, "Misc", "Screenshot", L["Auto ScreenShot"].."*", true, nil, updateScreenShot},
 		{1, "Misc", "Focuser", L["Easy Focus"]},
 		{1, "Misc", "BlockInvite", "|cffff0000"..L["BlockInvite"].."*", true},
+		{1, "Misc", "MawThreatBar", NewFeatureTag..L["MawThreatBar"], nil, nil, nil, L["MawThreatBarTip"]},
 	},
 	[14] = {
 		{1, "ACCOUNT", "VersionCheck", L["Version Check"]},
@@ -1357,14 +1359,14 @@ local function OpenGUI()
 	B.CreateFS(f, 18, L["NDui Console"], true, "TOP", 0, -10)
 	B.CreateFS(f, 16, DB.Version.." ("..DB.Support..")", false, "TOP", 0, -30)
 
-	local contact = B.CreateButton(f, 130, 20, NewFeatureTag..L["Contact"])
+	local contact = B.CreateButton(f, 130, 20, L["Contact"])
 	contact:SetPoint("BOTTOMLEFT", 20, 15)
 	contact:SetScript("OnClick", function()
 		f:Hide()
 		G:AddContactFrame()
 	end)
 
-	local unlock = B.CreateButton(f, 130, 20, NewFeatureTag..L["UnlockUI"])
+	local unlock = B.CreateButton(f, 130, 20, L["UnlockUI"])
 	unlock:SetPoint("BOTTOM", contact, "TOP", 0, 2)
 	unlock:SetScript("OnClick", function()
 		f:Hide()
