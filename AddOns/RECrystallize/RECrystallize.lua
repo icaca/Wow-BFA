@@ -468,7 +468,9 @@ function RE:SyncDatabase()
 			
 			table.insert(His,{["Price"]= Price, ["Amount"]= Amount , ["LastSeen"]= RE.Config.LastScan})
 						   
-			RE.DB[RE.RealmString][itemID][variant] = {["Price"]= Price, ["Amount"]= Amount , ["LastSeen"]= RE.Config.LastScan, ["His"] = His}
+			RE.DB[RE.RealmString][itemID][variant] = {["Price"]= Price, ["Amount"]= Amount , ["LastSeen"]= RE.Config.LastScan, 
+			--["His"] = His
+		}
 		end
 	end
 end
