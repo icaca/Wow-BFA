@@ -187,6 +187,8 @@ L["GnomeSequencer was originally written by semlar of wowinterface.com."] = "O G
 L["GnomeSequencer-Enhanced"] = "GnomeSequencer-Enhanced"
 L["GnomeSequencer-Enhanced loaded.|r  Type "] = "GnomeSequencer-Enhanced carregado.|r  Digite "
 L["GSE"] = "GSE"
+--[[Translation missing --]]
+L["GSE - %s's Macros"] = "GSE - %s's Macros"
 L["GSE allows plugins to load Macro Collections as plugins.  You can reload a collection by pressing the button below."] = "O GSE permite que os plug-ins carreguem Coleções de Macro como plug-ins. Você pode recarregar uma coleção pressionando o botão abaixo."
 L["GS-E can save all macros or only those versions that you have created locally.  Turning this off will cache all macros in your WTF\\GS-Core.lua variables file but will increase load times and potentially cause colissions."] = "O GS-E pode salvar todas as macros ou apenas as versões que você criou localmente. Desativar isso armazenará em cache todas as macros no seu arquivo de variáveis WTF\\GS-Core.lua, mas aumentará o tempo de carregamento e potencialmente causará colisões."
 L["GSE has a LibDataBroker (LDB) data feed.  List Other GSE Users and their version when in a group on the tooltip to this feed."] = "O GSE possui um feed de dados LibDataBroker (LDB). Lista outros usuários do GSE e sua versão, quando em um grupo, na tooltip para este feed."
@@ -389,6 +391,10 @@ L["Rename New Macro"] = "Rename New Macro"
 --[[Translation missing --]]
 L["Replace"] = "Replace"
 --[[Translation missing --]]
+L["Request Macro"] = "Request Macro"
+--[[Translation missing --]]
+L["Request that the user sends you a copy of this macro."] = "Request that the user sends you a copy of this macro."
+--[[Translation missing --]]
 L["Require Target to use"] = "Require Target to use"
 --[[Translation missing --]]
 L["Reset Macro when out of combat"] = "Reset Macro when out of combat"
@@ -421,6 +427,8 @@ L["Scenario"] = "Scenario"
 L["Scenario setting changed to Default."] = "Scenario setting changed to Default."
 --[[Translation missing --]]
 L["Seed Initial Macro"] = "Seed Initial Macro"
+--[[Translation missing --]]
+L["Select a Sequence"] = "Select a Sequence"
 --[[Translation missing --]]
 L["Select Other Version"] = "Select Other Version"
 L["Send"] = "Enviar"

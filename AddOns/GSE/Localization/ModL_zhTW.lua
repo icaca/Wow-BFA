@@ -198,6 +198,8 @@ L["GnomeSequencer was originally written by semlar of wowinterface.com."] = "Gno
 L["GnomeSequencer-Enhanced"] = "GnomeSequencer-增強"
 L["GnomeSequencer-Enhanced loaded.|r  Type "] = "GnomeSequencer-增強 加載.|r 輸入"
 L["GSE"] = "GSE"
+--[[Translation missing --]]
+L["GSE - %s's Macros"] = "GSE - %s's Macros"
 L["GSE allows plugins to load Macro Collections as plugins.  You can reload a collection by pressing the button below."] = "GSE允許插件加載巨集整合包作為插件. 你可以按下面的按鈕重新加載整合包."
 L["GS-E can save all macros or only those versions that you have created locally.  Turning this off will cache all macros in your WTF\\GS-Core.lua variables file but will increase load times and potentially cause colissions."] = "GS-E可以保存所有的巨集或只有那些你所創建的本地版本.關閉這個功能會在你的WTF \\ gs-core.lua變量文件緩存所有巨集,但會增加加載時間,並有可能引起衝突."
 L["GSE has a LibDataBroker (LDB) data feed.  List Other GSE Users and their version when in a group on the tooltip to this feed."] = "GSE有一個LibDataBroker（LDB）數據源. 當在提示這一組源時,列出其他GSE的用戶的版本."
@@ -375,6 +377,10 @@ L["Record the spells and items you use into a new macro."] = "將您使用的法
 L["Registered Addons"] = "註冊插件"
 L["Rename New Macro"] = "重命名新巨集"
 L["Replace"] = "替換"
+--[[Translation missing --]]
+L["Request Macro"] = "Request Macro"
+--[[Translation missing --]]
+L["Request that the user sends you a copy of this macro."] = "Request that the user sends you a copy of this macro."
 L["Require Target to use"] = "需要使用目標"
 L["Reset Macro when out of combat"] = "當離開戰鬥時重置巨集"
 L["Reset this macro when you exit combat."] = "退出戰鬥時重置此巨集."
@@ -397,6 +403,8 @@ L["Scenario"] = "Scenario"
 --[[Translation missing --]]
 L["Scenario setting changed to Default."] = "Scenario setting changed to Default."
 L["Seed Initial Macro"] = "種子初始巨集"
+--[[Translation missing --]]
+L["Select a Sequence"] = "Select a Sequence"
 L["Select Other Version"] = "選擇其他版本"
 L["Send"] = "發送"
 L["Send this macro to another GSE player who is on the same server as you are."] = "將此巨集發送給與您在同一服務器上的另一個GSE播放器."

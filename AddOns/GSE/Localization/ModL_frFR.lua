@@ -297,6 +297,8 @@ L["GnomeSequencer-Enhanced loaded.|r  Type "] = "GnomeSequencer-Enhanced loaded.
 --[[Translation missing --]]
 L["GSE"] = "GSE"
 --[[Translation missing --]]
+L["GSE - %s's Macros"] = "GSE - %s's Macros"
+--[[Translation missing --]]
 L["GSE allows plugins to load Macro Collections as plugins.  You can reload a collection by pressing the button below."] = "GSE allows plugins to load Macro Collections as plugins.  You can reload a collection by pressing the button below."
 --[[Translation missing --]]
 L["GS-E can save all macros or only those versions that you have created locally.  Turning this off will cache all macros in your WTF\\GS-Core.lua variables file but will increase load times and potentially cause colissions."] = "GS-E can save all macros or only those versions that you have created locally.  Turning this off will cache all macros in your WTF\\GS-Core.lua variables file but will increase load times and potentially cause colissions."
@@ -610,6 +612,10 @@ L["Registered Addons"] = "Registered Addons"
 --[[Translation missing --]]
 L["Rename New Macro"] = "Rename New Macro"
 L["Replace"] = "Remplacer"
+--[[Translation missing --]]
+L["Request Macro"] = "Request Macro"
+--[[Translation missing --]]
+L["Request that the user sends you a copy of this macro."] = "Request that the user sends you a copy of this macro."
 L["Require Target to use"] = "A besoin d'une cible pour être utilisé"
 --[[Translation missing --]]
 L["Reset Macro when out of combat"] = "Reset Macro when out of combat"
@@ -641,6 +647,8 @@ L["Scenario"] = "Scenario"
 L["Scenario setting changed to Default."] = "Scenario setting changed to Default."
 --[[Translation missing --]]
 L["Seed Initial Macro"] = "Seed Initial Macro"
+--[[Translation missing --]]
+L["Select a Sequence"] = "Select a Sequence"
 L["Select Other Version"] = "Selectionner une autre version"
 L["Send"] = "Envoyer"
 --[[Translation missing --]]

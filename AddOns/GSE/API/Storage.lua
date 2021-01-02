@@ -193,6 +193,9 @@ function GSE.PerformMergeAction(action, classid, sequenceName, newSequence)
 end
 
 function GSE.OOCPerformMergeAction(action, classid, sequenceName, newSequence)
+    if GSE.isEmpty(newSequence.LastUpdated) then
+        newSequence.LastUpdated = GSE.GetTimestamp()
+    end
     if sequenceName:len() > 28 then
         local tempseqName = sequenceName:sub(1,28)
         GSE.Print(string.format(L["Your sequence name was longer than 27 characters.  It has been shortened from %s to %s so that your macro will work."], sequenceName, tempseqName), "GSE Storage")
@@ -1624,7 +1627,7 @@ function GSE.ExportSequenceWLMFormat(sequence, sequencename)
                 end
             end
             if not GSE.isEmpty(sequence.Scenario) then
-                if sequence.Party == k then
+                if sequence.Scenario == k then
                     returnstring = returnstring .. "- Scenarios use version " .. k .. "\n"
                 end
             end
@@ -1674,4 +1677,18 @@ function GSE.ExportSequenceWLMFormat(sequence, sequencename)
     end
 
     return returnstring
+end
+
+
+function GSE.GetSequenceSummary()
+    local returntable = {}
+    for k,v in ipairs(GSE.Library) do
+        returntable[k]= {}
+        for i,j in pairs(v) do
+            returntable[k][i] = {}
+            returntable[k][i].Help = j.Help
+            returntable[k][i].LastUpdated = j.LastUpdated
+        end
+    end
+    return returntable
 end
