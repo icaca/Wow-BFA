@@ -701,6 +701,10 @@ if UnitClassBase( "player" ) == "SHAMAN" then
                 end
             end,
 
+            timeToReady = function ()
+                return max( pet.fire_elemental.remains, pet.storm_elemental.remains, pet.primal_fire_elemental.remains, pet.primal_storm_elemental.remains )
+            end,
+
             auras = {
                 -- Conduit
                 vital_accretion = {
@@ -1139,6 +1143,8 @@ if UnitClassBase( "player" ) == "SHAMAN" then
                 removeBuff( "echoing_shock" )
                 applyDebuff( "target", "lightning_lasso" )
             end,
+
+            copy = 305485
         },
 
         lightning_shield = {
