@@ -901,11 +901,9 @@ if UnitClassBase( "player" ) == "PRIEST" then
             cast = function () return buff.dark_thought.up and 0 or ( 1.5 * haste ) end,
             charges = function () return 1 + ( buff.voidform.up and 1 or 0 ) + ( buff.dark_thought.up and 1 or 0 ) end,
             cooldown = function ()
-                if buff.dark_thought.up then return 0 end
                 return 7.5 * haste
             end,
             recharge = function ()
-                if buff.dark_thought.up then return 0 end
                 return 7.5 * haste
             end,
             gcd = "spell",
@@ -985,7 +983,7 @@ if UnitClassBase( "player" ) == "PRIEST" then
 
         mind_sear = {
             id = 48045,
-            cast = 3,
+            cast = 4.5,
             cooldown = 0,
             gcd = "spell",
 

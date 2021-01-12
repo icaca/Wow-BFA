@@ -8184,56 +8184,57 @@ function Hekili:GetOptions()
                     },
 
                     welcome = {
-                        type = "group",
+                        type = 'description',
                         name = "",
-                        inline = true,
+                        fontSize = "medium",
+                        image = "Interface\\Addons\\Hekili\\Textures\\Taco256",
+                        imageWidth = 192,
+                        imageHeight = 192,
                         order = 5,
-                        args = {
-                            desc = {
-                                type = 'description',
-                                name = function ()
-                                    local output = "\n|cFF00CCFFTHANK YOU TO OUR SUPPORTERS!|r\n\n"
-
-                                    for i, name in ipairs( ns.Patrons ) do
-                                        if i == 1 then
-                                            output = output .. name
-                                        elseif i == #ns.Patrons then
-                                            output = output .. ", and " .. name .. "."
-                                        else
-                                            output = output .. ", " .. name
-                                        end
-                                    end
-
-                                    output = output .. "\n\nPlease see the |cFFFFD100Issue Reporting|r tab for information about reporting bugs.\n"
-                                    return output
-                                end,
-                                image = "Interface\\Addons\\Hekili\\Textures\\LOGO-ORANGE",
-                                imageWidth = 150,
-                                imageHeight = 150,
-                                fontSize = "medium",
-                                order = 2,
-                                width = "full"
-                            },
-
-                            curse = {
-                                type = 'input',
-                                name = "Twitch / Curse",
-                                order = 3,
-                                get = function () return "https://www.curseforge.com/wow/addons/hekili" end,
-                                set = function () end,
-                                width = "full",
-                            },
-
-                            github = {
-                                type = "input",
-                                name = "GitHub",
-                                order = 4,
-                                get = function () return "http://github.com/Hekili/hekili/" end,
-                                set = function () end,
-                                width = "full",
-                            },
-                        }
+                        width = "full"
                     },
+
+                    supporters = {
+                        type = "description",
+                        name = function ()
+                            return "|cFF00CCFFTHANK YOU TO OUR SUPPORTERS!|r\n\n" .. ns.Patrons .. ".\n\n" ..
+                                "Please see the |cFFFFD100Issue Reporting|r tab for information about reporting bugs.\n\n"
+                        end,
+                        fontSize = "medium",
+                        order = 6,
+                        width = "full"
+                    },
+
+                    curse = {
+                        type = "input",
+                        name = "Curse",
+                        order = 10,
+                        get = function () return "https://www.curseforge.com/wow/addons/hekili" end,
+                        set = function () end,
+                        width = "full",
+                        dialogControl = "SFX-Info-URL",
+                    },
+
+                    github = {
+                        type = "input",
+                        name = "GitHub",
+                        order = 11,
+                        get = function () return "https://github.com/Hekili/hekili/" end,
+                        set = function () end,
+                        width = "full",
+                        width = "full",
+                        dialogControl = "SFX-Info-URL",
+                    },
+
+                    simulationcraft = {
+                        type = "input",
+                        name = "SimC",
+                        order = 12,
+                        get = function () return "https://github.com/simulationcraft/simc/wiki" end,
+                        set = function () end,
+                        width = "full",
+                        dialogControl = "SFX-Info-URL",
+                    }
                 }
             },
 
@@ -8311,6 +8312,7 @@ function Hekili:GetOptions()
                         width = "full",
                         get = function() return "http://github.com/Hekili/hekili/issues" end,
                         set = function() return end,
+                        dialogControl = "SFX-Info-URL"
                     },
                 }
             },
@@ -10007,14 +10009,17 @@ function Hekili:TogglePause( ... )
         end
 
         self.Pause = true
-        self:SaveDebugSnapshot()
-        self:Print( "Snapshot saved." )
-        self.ActiveDebug = false
-
-        if not warnOnce then
-            Hekili:Print( "Snapshots are viewable via /hekili (until you reload your UI)." )
-            warnOnce = true
+        
+        if self:SaveDebugSnapshot() then
+            if not warnOnce then
+                self:Print( "Snapshot saved; snapshots are viewable via /hekili (until you reload your UI)." )
+                warnOnce = true
+            else
+                self:Print( "Snapshot saved." )
+            end
         end
+        
+        self.ActiveDebug = false
     else
         self.Pause = false
     end
