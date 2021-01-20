@@ -373,9 +373,10 @@ function RE:Scan()
 		if status and count and price and itemID and type(quality) == "number" and count > 0 and price > 0 and itemID > 0 then
 			link = GetReplicateItemLink(i)
 			if link then
+				itemLevel = GetDetailedItemLevelInfo(link)
 				progress = progress + 1
 				RE.AHButton:SetText(progress.." / "..num)
-				RE.DBScan[i] = {["Price"] = price / count, ["Amount"] = count, ["ItemID"] = itemID, ["ItemLink"] = link, ["Quality"] = quality}
+				RE.DBScan[i] = {["Price"] = price / count, ["Amount"] = count, ["ItemID"] = itemID, ["Level"] = itemLevel, ["ItemLink"] = link, ["Quality"] = quality}
 			end
 		else
 			local item = Item:CreateFromItemID(itemID)
@@ -387,9 +388,10 @@ function RE:Scan()
 				if status and count and price and itemID and type(quality) == "number" and count > 0 and price > 0 and itemID > 0 then
 					link = GetReplicateItemLink(i)
 					if link then
+						itemLevel = GetDetailedItemLevelInfo(link)
 						progress = progress + 1
 						RE.AHButton:SetText(progress.." / "..num)
-						RE.DBScan[i] = {["Price"] = price / count, ["Amount"] = count, ["ItemID"] = itemID, ["ItemLink"] = link, ["Quality"] = quality}
+						RE.DBScan[i] = {["Price"] = price / count, ["Amount"] = count, ["ItemID"] = itemID, ["Level"] = itemLevel, ["ItemLink"] = link, ["Quality"] = quality}
 					end
 				end
 				if not next(inProgress) then
@@ -429,11 +431,11 @@ function RE:ParseDatabase()
 	for _, offer in pairs(RE.DBScan) do
 		if offer.Quality > 0 then
 			local itemStr
-			if IsLinkType(offer.ItemLink, "battlepet") then
-				itemStr = RE:GetPetString(offer.ItemLink)
-			else
-				itemStr = RE:GetItemString(offer.ItemLink)
-			end
+            if IsLinkType(offer.ItemLink, "battlepet") then
+                itemStr = RE:GetPetString(offer.ItemLink)
+            else
+                itemStr = offer.Level
+            end
 			if RE.DBTemp[offer.ItemID] == nil then
 				RE.DBTemp[offer.ItemID] = {}
 			end
@@ -490,11 +492,13 @@ function RE:CleanDatabase()
 end
 
 function RE:GetItemString(link)
-	return TSM_API.ToItemString(link)
+	return GetDetailedItemLevelInfo(link)
 end
 
 function RE:GetPetString(link)
-	return TSM_API.ToItemString(link)
+    local raw = select(2, ExtractLink(link))
+    -- print(link,raw)
+    return tonumber(strmatch(raw, "^(%d+):"))
 end
 
 function RE:GetCheapestVariant(items,arg)
