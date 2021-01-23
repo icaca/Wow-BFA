@@ -1,0 +1,50 @@
+## Interface: 90001
+## Title: EpicMusicPlayer
+## Notes: Browse and play WoW game music
+## Author: yess
+## SavedVariables: EpicMusicPlayer_PlayList, EpicMusicPlayerDB, EpicMusicPlayerBrokerDB, EpicMusicDancerDB
+## OptionalDeps: Ace3, LibSharedMedia-3.0
+## X-Embeds: Ace3, LibSharedMedia-3.0
+
+## Version: v7.3
+## X-Category: Audio
+
+#@no-lib-strip@
+libs\libs.xml
+#@end-no-lib-strip@
+libs\LibDataBroker-1.1.lua
+#@no-lib-strip@
+libs\LibDBIcon-1.0.xml
+#@end-no-lib-strip@
+
+localization.lua
+
+core\core.lua
+core\util.lua
+core\volumeControl.lua
+core\scrolllist.lua
+core\playlistframe.lua
+core\options.lua
+core\tooltip.lua
+core\dropdown.lua
+core\listmanagement.lua
+#core\musicevent.lua
+core\player.lua
+core\easter.lua
+core\osd.lua
+core\chat.lua
+core\bindings.lua
+
+gui\gui.lua
+gui\skins.lua
+
+broker\empbroker.lua
+#dancer\EpicMusicDancer.lua
+gamemusic\Epic.lua
+gamemusic\All.lua
+gamemusic\BattleForAzeroth.lua
+gamemusic\Classic.lua
+gamemusic\Draenor.lua
+gamemusic\Legion.lua
+gamemusic\Pandaria.lua
+gamemusic\Shadowlands.lua
