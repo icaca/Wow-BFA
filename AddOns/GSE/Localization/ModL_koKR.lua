@@ -32,6 +32,8 @@ L[" was imported as a new macro."] = " was imported as a new macro."
 L[" was imported with the following errors."] = " was imported with the following errors."
 L[" was updated to new version."] = "|1이;가; 새 버전으로 업데이트되었습니다."
 --[[Translation missing --]]
+L["%sMACRO VALIDATION ERROR|r - PostMacro found with invalid LoopLimit.  PostMacro will not be saved for version %s"] = "%sMACRO VALIDATION ERROR|r - PostMacro found with invalid LoopLimit.  PostMacro will not be saved for version %s"
+--[[Translation missing --]]
 L[". This version was not loaded."] = ". This version was not loaded."
 --[[Translation missing --]]
 L["/gs |r to get started."] = "/gs |r to get started."
@@ -76,8 +78,7 @@ L["A sequence collision has occured.  Extra versions of this macro have been loa
 L["A sequence collision has occured.  Your local version of "] = "A sequence collision has occured.  Your local version of "
 L["About"] = "정보"
 L["About GSE"] = "GSE 정보"
---[[Translation missing --]]
-L["Actions"] = "Actions"
+L["Actions"] = "행동"
 --[[Translation missing --]]
 L["Active Version: "] = "Active Version: "
 --[[Translation missing --]]
@@ -232,21 +233,15 @@ L["Gameplay Options"] = "게임 플레이 옵션"
 L["General"] = "일반"
 L["General Options"] = "일반 옵션"
 L["Global Macros are those that are valid for all classes.  GSE2 also imports unknown macros as Global.  This option will create a button for these macros so they can be called for any class.  Having all macros in this space is a performance loss hence having them saved with a the right specialisation is important."] = "전역 매크로는 모든 직업에 유효한 매크로입니다. GSE2는 알 수 없는 매크로도 Global로 가져옵니다. 이 옵션은 이러한 매크로에 대한 버튼을 생성하므로 모든 직업에 대해 호출할 수 있습니다. 이 자리에 모든 매크로가 있으면 성능이 저하되므로 올바른 전문화로 저장하는 것이 중요합니다."
---[[Translation missing --]]
-L["Gnome Sequencer: Compress a Sequence String."] = "Gnome Sequencer: Compress a Sequence String."
---[[Translation missing --]]
-L["Gnome Sequencer: Export a Sequence String."] = "Gnome Sequencer: Export a Sequence String."
+L["Gnome Sequencer: Compress a Sequence String."] = "Gnome Sequencer: 시퀀스 문자열을 압축합니다."
+L["Gnome Sequencer: Export a Sequence String."] = "Gnome Sequencer: 시퀀스 문자열을 내보냅니다."
 L["Gnome Sequencer: Import a Macro String."] = "Gnome Sequencer: 매크로 문자열을 가져옵니다."
 --[[Translation missing --]]
 L["Gnome Sequencer: Record your rotation to a macro."] = "Gnome Sequencer: Record your rotation to a macro."
---[[Translation missing --]]
-L["Gnome Sequencer: Sequence Debugger. Monitor the Execution of your Macro"] = "Gnome Sequencer: Sequence Debugger. Monitor the Execution of your Macro"
---[[Translation missing --]]
-L["Gnome Sequencer: Sequence Editor."] = "Gnome Sequencer: Sequence Editor."
---[[Translation missing --]]
-L["Gnome Sequencer: Sequence Version Manager"] = "Gnome Sequencer: Sequence Version Manager"
---[[Translation missing --]]
-L["Gnome Sequencer: Sequence Viewer"] = "Gnome Sequencer: Sequence Viewer"
+L["Gnome Sequencer: Sequence Debugger. Monitor the Execution of your Macro"] = "Gnome Sequencer: 시퀀스 디버거. 매크로 실행 모니터링"
+L["Gnome Sequencer: Sequence Editor."] = "Gnome Sequencer: 시퀀스 편집기."
+L["Gnome Sequencer: Sequence Version Manager"] = "Gnome Sequencer: 시퀀스 버전 관리자"
+L["Gnome Sequencer: Sequence Viewer"] = "Gnome Sequencer: 시퀀스 뷰어"
 --[[Translation missing --]]
 L["GnomeSequencer was originally written by semlar of wowinterface.com."] = "GnomeSequencer was originally written by semlar of wowinterface.com."
 --[[Translation missing --]]
