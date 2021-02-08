@@ -296,6 +296,9 @@ GSE:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
 GSE:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 GSE:RegisterEvent("UNIT_FACTION")
 GSE:RegisterEvent("PLAYER_LEVEL_UP")
+if GSE.GameMode > 8 then
+    GSE:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+end
 
 local function PrintGnomeHelp()
     GSE.Print(L["GnomeSequencer was originally written by semlar of wowinterface.com."], GNOME)
@@ -347,6 +350,8 @@ function GSE:GSSlash(input)
         end
     elseif command == "help" then
         PrintGnomeHelp()
+    elseif command == "gse3" then
+        _G["GSE3"]:Show()
     elseif command == "cleanorphans" or command == "clean" then
         GSE.CleanOrphanSequences()
     elseif command == "forceclean" then
