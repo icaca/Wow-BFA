@@ -174,7 +174,7 @@ function TSM.OnInitialize()
 	end
 
 	-- RECrystallize price sources
-	if Wow.IsAddonEnabled("RECrystallize") and RECrystallize and RECrystallize_PriceCheck then
+	if Wow.IsAddonEnabled("RECrystallize") then
 		hooksecurefunc("RECrystallize_PriceCheck", function()
 		CustomPrice.OnSourceChange("RECDB")
 		end)
