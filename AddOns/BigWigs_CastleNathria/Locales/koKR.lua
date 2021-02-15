@@ -162,4 +162,12 @@ if L then
 	L.deplina = "디플리나"
 	L.dragost = "드래고스트"
 	L.kullan = "쿨란"
+
+	--[[ Shriekwing -> Xy'mox ]]--
+	L.antiquarian = "사악한 골동품 수집가"
+	L.conservator = "나스리아 정원지기"
+	L.archivist = "나스리아 기록관"
+
+	--[[ Sludgefist -> Stone Legion Generals ]]--
+	L.goliath = "돌 군단 거수"
 end

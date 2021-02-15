@@ -162,4 +162,12 @@ if L then
 	L.deplina = "Deplina"
 	L.dragost = "Dragost"
 	L.kullan = "Kullan"
+
+	--[[ Shriekwing -> Xy'mox ]]--
+	L.antiquarian = "Antiquária Sinistra"
+	L.conservator = "Conservador Nathriano"
+	L.archivist = "Arquivista-chefe Nathriana"
+
+	--[[ Sludgefist -> Stone Legion Generals ]]--
+	L.goliath = "Golias da Legião de Pedra"
 end
