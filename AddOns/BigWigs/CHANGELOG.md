@@ -1,22 +1,23 @@
 # BigWigs
 
-## [v214](https://github.com/BigWigsMods/BigWigs/tree/v214) (2021-02-14)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v213...v214) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v215](https://github.com/BigWigsMods/BigWigs/tree/v215) (2021-02-17)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v214...v215) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
 - bump version  
-- CastleNathria/SunKingsSalvation: Ember Blast is 5 seconds on LFR  
-- CastleNathria/Trash: Fix player name not being class colored  
-- Update itIT (#1003)  
-- CastleNathria/TheCouncilofBlood: Use the full length yell for dance directions  
-- CastleNathria/Trash: Add Ravenous Feast  
-- Add missing frFR string  
-- parser: Check that common and plugin locales match enUS  
-- CastleNathria/Trash: Add more spells  
-- CastleNathria/Xymox: Shorten "Glyph of Destruction" to "Bomb" (messages only)  
-- Common locale: Add "Explosion"  
-- Update zhTW (#1002)  
-- Update zhCN (#1001)  
-- Update frFR (#1000)  
-- Update deDE (#999)  
-- CastleNathria/Xymox: Correct Seeds timers for wave 3 and later in non-Mythic difficulties  
-- Plugins/Locales: Improve class color description  
+- Update option files  
+- Common locale: Add plural "Beams"  
+- Plugins/Statistics: Update comments  
+- CastleNathria/SunKingsSalvation: Fix some Cloak of Flames bars not being shortened  
+- CastleNathria/Shriekwing: Stop showing Echoing Screech for Normal and LFR  
+- CastleNathria/TheCouncilofBlood: Update Dancing Fever timer when Danse Macabre happens  
+- CastleNathria/InervaDarkvein: Move some casts to use _START in case they are interrupted by reaching a container swap  
+- CastleNathria/TheCouncilofBlood: Update some timers to use _START in case they get interrupted from Danse Macabre  
+- CastleNathria/StoneLegionGenerals: Update timers  
+- CastleNathria/SunKingsSalvation: Check for the Unleashed Pyroclasm cast being interrupted to avoid incorrect warnings when notifying players about the Cloak of Flames on _REMOVED  
+- CastleNathria/Denathrius: Stop the Through the Mirror infobox from gaining more players in the mirror phase and move the enabling of the infobox to the start of his channel  
+- Update esMX (#1005)  
+- Update ptBR (#1004)  
+- CastleNathria/Denathrius: Fix bad math when comparing ravageCount  
+- CastleNathria/Xymox: Encounter Event spell is now implemented for stage changes  
+- workflow: Parse from the toc  
+- parser: Handle starting from a toc file  

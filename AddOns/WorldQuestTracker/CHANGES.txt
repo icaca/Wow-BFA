@@ -1,10 +1,10 @@
-lightweight tag e55bda880306fcf73e5bfd850a00179f7a2f38c2 v9.0.2.418
+lightweight tag 4dcb628d3e816d8b75a4a27b62d73b1a24606638 v9.0.2.419
 Author:	Tercio Jose <terciob19@hotmail.com>
-Date:	Tue Feb 16 13:20:17 2021 -0300
+Date:	Wed Feb 17 13:58:21 2021 -0300
 
-commit e55bda880306fcf73e5bfd850a00179f7a2f38c2
+commit 4dcb628d3e816d8b75a4a27b62d73b1a24606638
 Author: Tercio Jose <terciob19@hotmail.com>
-Date:   Tue Feb 16 13:20:17 2021 -0300
+Date:   Wed Feb 17 13:58:21 2021 -0300
 
-    Framework update and added Oribos Flight Master tracker
+    Flight master frame is now smaller, the arrow is brighter, a close button has been added
 
