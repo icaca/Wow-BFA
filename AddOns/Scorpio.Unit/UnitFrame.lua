@@ -286,10 +286,10 @@ do
         local actionSet         = _ActionType[action]
         if not actionSet then return end
 
-        if not with or not actionSet.tranMacro then
-            return action, content
-        else
+        if with and actionSet.tranMacro then
             return "MacroText", actionSet.tranMacro(content, with)
+        else
+            return action, content
         end
     end
 
@@ -459,7 +459,7 @@ do
 
         if _SetupSnippet[group] and _UnitMap[self] ~= unit then
             _UnitMap[self]      = unit
-            Manager:RunFor(self, _SetupSnippet[group]:gsub("%%%%unit", unit or ""))
+            Manager:RunFor(self, _SetupSnippet[group]:gsub("%%unit", unit or ""))
         end
 
         _HoverOnUnitFrame       = self
@@ -676,7 +676,7 @@ end
 --- The root unit frame widget class with hover spell casting
 -- We can bind short keys to the hover spell group, each unit frame can have a group
 --
--- UnitFrame.HoverSpellGroups["Default"].Spell["Holy Light"].With["target'].Key = "ctrl-f"
+-- UnitFrame.HoverSpellGroups["Default"].Spell["Holy Light"].With["target"].Key = "ctrl-f"
 -- UnitFrame.HoverSpellGroups["Default"].MacroText["/cast Holy Light"].Key = "ctrl-f"
 --
 __Sealed__() __SecureTemplate__"SecureUnitButtonTemplate, SecureHandlerAttributeTemplate"
@@ -772,13 +772,16 @@ class "UnitFrame" (function(_ENV)
                     get         = function(self, content)
                         self.Data.Type      = name
                         self.Data.Content   = content
+                        self.Data.With      = nil
                         return self
                     end,
                 }
             else
                 property(name)  {
                     get         = function(self)
-                        self.Data.Type       = name
+                        self.Data.Type      = name
+                        self.Data.Content   = nil
+                        self.Data.With      = nil
                         return self
                     end
                 }
@@ -893,7 +896,7 @@ class "UnitFrame" (function(_ENV)
     __Static__() __Indexer__(NEString)
     property "HoverSpellGroups" {
         get                     = function(self, name)
-            return HoverSpellGroupAccessor[name]
+            return HoverSpellGroupAccessor(name)
         end,
     }
 

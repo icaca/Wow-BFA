@@ -1,10 +1,13 @@
 ## Interface: 90002
 ## Author: 绿毛龟12138
-## Version: v1
+## Version: v2
 ## Title: GuildBankSort
 ## Notes: 公会银行整理
 ## DefaultState: enabled
-## Dependencies: Scorpio,Scorpio.UI
+## Dependencies: Scorpio,Scorpio.UI,Scorpio.Widget
+## SavedVariables: GuildBankSortConfig
 
+Localization.lua
 Core.lua
 Sort.lua
+Transfer.lua

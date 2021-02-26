@@ -1,6 +1,12 @@
 Scorpio "GuildBankSort" ""
 
+L = _Locale
 GUILDBANK_TAB_ITEM_SIZE = 98
+
+function OnLoad()
+    _Config = SVManager("GuildBankSortConfig")
+    _Config:SetDefault{PickupInterval = 1}
+end
 
 __Async__()
 function OnEnable(self)
@@ -12,13 +18,22 @@ end
 
 -- 创建整理按钮
 function CreateSortButton()
-    SortButton = Button("SortButton", GuildBankFrame)
+    SortButton = Button("GuildBankSortButton", GuildBankFrame)
     SortButton:SetSize(18, 18)
     SortButton:SetPoint("RIGHT", GuildItemSearchBox, "LEFT", -8, 0)
     SortButton:SetNormalAtlas("bags-button-autosort-up")
     SortButton:SetPushedAtlas("bags-button-autosort-down")
     SortButton:SetHighlightTexture([[Interface\Buttons\ButtonHilight-Square]],"ADD")
+    SortButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     SortButton.OnClick = OnSortButtonClick
+    SortButton.OnEnter = function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:AddLine(L["guild_bank_sort_button_tooltip"],nil, nil, nil, true)
+        GameTooltip:Show()
+    end
+    SortButton.OnLeave = function(self)
+        GameTooltip:Hide()
+    end
     GUILDBANKFRAME_OPENED()
 end
 
@@ -26,22 +41,14 @@ __SystemEvent__()
 function GUILDBANKFRAME_OPENED()
     if not SortButton then return end
     HideLoading()
-    ViewedTab = {}
-    local currentTab = GetCurrentGuildBankTab()
-    -- 记录刷新标签的时间（用来判断该标签数据是否过时）
-    -- todo item transfer
-    ViewedTab[GetCurrentGuildBankTab()] = GetTime()
-    if not CanSortTab(currentTab) then
-        SortButton:Hide()
-    else
-        SortButton:Show()
+    if ConfigDialog then
+        ConfigDialog:Hide()
     end
 end
 
 __AddonSecureHook__ "Blizzard_GuildBankUI"
-function GuildBankTab_OnClick(self, mouseButton, currentTab)
-    UpdateSortButtonStatus(currentTab)
-    ViewedTab[currentTab] = GetTime()
+function GuildBankFrame_UpdateTabs()
+    UpdateSortButtonStatus(GetCurrentGuildBankTab())
 end
 
 function UpdateSortButtonStatus(tab)
@@ -62,15 +69,59 @@ end
 
 -- 整理按钮点击事件
 function OnSortButtonClick(self, button)
-    PlaySound(SOUNDKIT.UI_BAG_SORTING_01)
-    FireSystemEvent("SPAUI_GUILDBANK_SORT")
+    if button == "LeftButton" then
+        if IsAltKeyDown() then
+            ShowConfigDialog()
+        else
+            PlaySound(SOUNDKIT.UI_BAG_SORTING_01)
+            FireSystemEvent("SPAUI_GUILDBANK_SORT")
+        end
+    else
+        FireSystemEvent("SPAUI_GUILDBANK_TRANSFER")
+    end
+end
+
+function ShowConfigDialog()
+    if not ConfigDialog then
+        ConfigDialog = Dialog("GuildBankSortConfigDialog", GuildBankFrame)
+        local PickupIntervalTrackBar = TrackBar("PickupIntervalTrackBar", ConfigDialog)
+        PickupIntervalTrackBar:SetValueStep(0.1)
+        PickupIntervalTrackBar:SetMinMaxValues(1, 5)
+        PickupIntervalTrackBar:SetSize(150, 25)
+        PickupIntervalTrackBar:SetLocation{Anchor("CENTER")}
+        PickupIntervalTrackBar:SetValue(_Config.PickupInterval)
+        PickupIntervalTrackBar.OnValueChanged = function(self, value)
+            _Config.PickupInterval = self:GetValue()
+        end
+
+        Style[ConfigDialog]                         = {
+            size                                    = Size(300, 200),
+            location                                = {
+                Anchor("CENTER", 0, 0, "UIParent", "CENTER")
+            },
+            Header                                  = {
+                text                                = L["guild_bank_config_dialog_title"]
+            },
+
+            PickupIntervalTrackBar                  = {
+
+                Label                               = {
+                    text                            = L["guild_bank_config_pickup_interval"],
+                    location                        = {
+                        Anchor("BOTTOM", 0, 5, nil, "TOP")
+                    }
+                }
+            }
+        }
+    end
+
+    ConfigDialog:Show()
 end
 
 -- 显示进度条
-__Arguments__{NEString/nil}
-function ShowLoading(progressText)
+function ShowLoading(value, maxValue, prefix)
     if not MaskLayer then
-        MaskLayer = Frame("MaskerLayer", GuildBankFrame)
+        MaskLayer = Frame("GuildBankSortMaskerLayer", GuildBankFrame)
         MaskLayer:SetPoint("TOPLEFT",GuildBankFrame.LeftBorder, "TOPLEFT", 0, 8)
         MaskLayer:SetPoint("BOTTOM", 0, -32)
         MaskLayer:SetPoint("RIGHT", 45, 0)
@@ -80,12 +131,42 @@ function ShowLoading(progressText)
         BankFrameMask:SetPoint("TOPLEFT")
         BankFrameMask:SetPoint("BOTTOMRIGHT", GuildBankFrame, "BOTTOMRIGHT")
         BankFrameMask:SetColorTexture(0, 0, 0, 0.3)
-        local ProgressText = FontString("ProgressText", MaskLayer)
-        ProgressText:SetPoint("LEFT", GuildBankFrameTab4, "RIGHT", 16)
-        ProgressText:SetText(progressText)
+        local ProgressBar = StatusBar("ProgressBar", MaskLayer)
+        ProgressBar:SetFrameStrata("HIGH")
+        local BarBackground = Texture("Background", ProgressBar, "BACKGROUND")
+        BarBackground:SetAllPoints(true)
+        BarBackground:SetColorTexture(0, 0, 0, 0.5)
+        local BarBorder = Texture("Border", ProgressBar, "ARTWORK", nil, 1)
+        BarBorder:SetTexture[[Interface\CastingBar\UI-CastingBar-Border]]
+        BarBorder:SetSize(256, 64)
+        BarBorder:SetPoint("TOP", 0, 28)
+        local BarSpark = Texture("Spark", ProgressBar, "OVERLAY")
+        BarSpark:SetTexture[[Interface\CastingBar\UI-CastingBar-Spark]]
+        BarSpark:SetBlendMode("ADD")
+        BarSpark:SetSize(32, 32)
+        local Text = FontString("Text", ProgressBar, "ARTWORK", "GameFontHighlightSmall")
+        Text:SetHeight(16)
+        Text:SetPoint("TOP", 0, 5)
+        ProgressBar:SetStatusBarTexture([[Interface\TargetingFrame\UI-StatusBar]], "ARTWORK", 0)
+        ProgressBar:SetStatusBarColor(1, 0.7, 0)
+        ProgressBar:SetSize(195, 13)
+        ProgressBar:SetPoint("LEFT", GuildBankFrameTab4, "RIGHT", 16, -3)
     else
-        MaskLayer:GetChild("ProgressText"):SetText(progressText)
         MaskLayer:Show()
+    end
+
+    local ProgressBar = MaskLayer:GetChild("ProgressBar")
+    if value and maxValue and prefix then
+        ProgressBar:Show()
+        ProgressBar:SetMinMaxValues(0, maxValue)
+        ProgressBar:SetValue(value)
+        local Text = ProgressBar:GetChild("Text")
+        Text:SetText(prefix:format(value, maxValue))
+        local Spark = ProgressBar:GetChild("Spark")
+        local sparkPosition = ( value / maxValue ) * ProgressBar:GetWidth()
+        Spark:SetPoint("CENTER", ProgressBar, "LEFT", sparkPosition, 2)
+    else
+        ProgressBar:Hide()
     end
 end
 
@@ -95,22 +176,20 @@ function HideLoading()
     MaskLayer:Hide()
 end
 
--- 获取公会银行格子信息
--- return: slotInfos:每个格子对应的物品信息 itemInfos:每个物品对应的格子信息
+-- 获取公会银行物品信息
 function GetGuildBankSlotInfos(tab)
     local slotInfos = {}
-    local itemInfos = {}
     for slot = 1, GUILDBANK_TAB_ITEM_SIZE do
         Continue()
-        local info = {}
+        local slotInfo = {}
         local _, count = GetGuildBankItemInfo(tab,slot)
-        info.count = count
+        slotInfo.count = count
         if count > 0 then
             local link = GetGuildBankItemLink(tab, slot)
             if link then
                 local item = {}
                 local itemName, itemLink, itemQuality, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount,
-                    itemEquipLoc, _, sellPrice, classID, subclassID, _, expacID, setID, isCraftingReagent
+                    itemEquipLoc, itemTexture, sellPrice, classID, subclassID, _, expacID, setID, isCraftingReagent
                     = GetItemInfo(link)
                 item.itemId = tonumber(string.match(link, "item:(%d*)") or "0")
                 item.itemName = itemName
@@ -122,26 +201,49 @@ function GetGuildBankSlotInfos(tab)
                 item.itemSubType = itemSubType
                 item.itemStackCount = itemStackCount
                 item.itemEquipLoc = itemEquipLoc
+                item.itemTexture = itemTexture
                 item.sellPrice = sellPrice
                 item.classID = classID
                 item.subclassID = subclassID
                 item.expacID = expacID
                 item.setID = setID
                 item.isCraftingReagent = isCraftingReagent
-                info.item = item
-                
-                -- 存储物品信息
-                if item.itemId then
-                    local itemInfo = itemInfos[item.itemId]
-                    if not itemInfo then
-                        itemInfo = {}
-                        itemInfos[item.itemId] = itemInfo
-                    end
-                    tinsert(itemInfo,slot)
-                end
+                slotInfo.item = item
             end
         end
-        slotInfos[slot] = info
+        tinsert(slotInfos, slotInfo)
     end
-    return slotInfos, itemInfos
+    return slotInfos
+end
+
+local function GetPickupInterval()
+    local _, _, latencyHome, latencyWorld = GetNetStats()
+    return max(latencyHome, latencyWorld)/1000 + _Config.PickupInterval
+end
+
+-- 应用移动路径
+function ApplyPaths(paths, description)
+    local count = #paths
+    for index, path in ipairs(paths) do
+        if not GuildBankFrame:IsShown() then break end
+        ShowLoading(index, count, description)
+        PickupGuildBankItem(path.srcTab, path.srcSlot)
+        PickupGuildBankItem(path.desTab, path.desSlot)
+        if CursorHasItem() then
+            PickupGuildBankItem(path.desTab, path.desSlot)
+        end
+        Delay(GetPickupInterval())
+    end
+end
+
+-- 显示红字错误
+__Arguments__{NEString}
+function ShowUIError(text)
+    UIErrorsFrame:AddMessage(text, 1.0, 0.0, 0.0, 1, 3)
+end
+
+-- 显示消息
+__Arguments__{NEString}
+function ShowMessage(text)
+    print(text)
 end

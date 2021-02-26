@@ -624,28 +624,13 @@ end
 ------------------------------------------------------------
 do
     local function toAnchor(self, p, f, x, y)
-        local t = self:GetParent()
-        if IsSameUI(f, t) then
-            f   = nil
-        else
-            f   = f:GetName(not IsSameUI(f:GetParent(), t))
-            if not f then return nil end
-        end
+        f               = UIObject.GetRelativeUIName(self, f)
+        if f == false then return nil end
         return Anchor(p, x, y, f)
     end
 
     local function fromAnchor(self, anchor)
-        local f = anchor.relativeTo
-        local t = self:GetParent()
-
-        if f then
-            f   = t and UIObject.GetChild(t, f) or UIObject.FromName(f)
-            if not f then f = t end
-        else
-            f   = t
-        end
-
-        return anchor.point, f, anchor.x or 0, anchor.y or 0
+        return anchor.point, UIObject.GetRelativeUI(self, anchor.relativeTo) or self:GetParent(), anchor.x or 0, anchor.y or 0
     end
 
     --- the start point of the line
@@ -653,8 +638,8 @@ do
         name            = "StartPoint",
         type            = Anchor,
         require         = Line,
-        set             = function(self, anchor) self:SetStartPoint(fromAnchor(anchor)) end,
-        get             = function(self) return toAnchor(self:GetStartPoint()) end,
+        set             = function(self, anchor) self:SetStartPoint(fromAnchor(self, anchor)) end,
+        get             = function(self) return toAnchor(self, self:GetStartPoint()) end,
     }
 
     --- the end point of the line
@@ -662,8 +647,8 @@ do
         name            = "EndPoint",
         type            = Anchor,
         require         = Line,
-        set             = function(self, anchor) self:SetEndPoint(fromAnchor(anchor)) end,
-        get             = function(self) return toAnchor(self:GetEndPoint()) end,
+        set             = function(self, anchor) self:SetEndPoint(fromAnchor(self, anchor)) end,
+        get             = function(self) return toAnchor(self, self:GetEndPoint()) end,
     }
 
     --- the thickness of the line
@@ -2440,25 +2425,6 @@ do
         name            = "IconFrame",
         require         = Frame,
         childtype       = Frame,
-    }
-
-    -- The Label
-    UI.Property         {
-        name            = "FontString",
-        require         = Frame,
-        childtype       = FontString,
-    }
-
-    UI.Property         {
-        name            = "SecondFontString",
-        require         = Frame,
-        childtype       = FontString,
-    }
-
-    UI.Property         {
-        name            = "ThirdFontString",
-        require         = Frame,
-        childtype       = FontString,
     }
 end
 
