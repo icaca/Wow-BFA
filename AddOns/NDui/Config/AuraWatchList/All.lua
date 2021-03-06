@@ -60,7 +60,12 @@ local list = {
 		{AuraID = 307496, UnitID = "player"},	-- 神圣觉醒药水
 		{AuraID = 307497, UnitID = "player"},	-- 死亡偏执药水
 		{AuraID = 344314, UnitID = "player"},	-- 心华之速药水
+		{AuraID = 307195, UnitID = "player"},	-- 隐秘精魂药水
+		{AuraID = 342890, UnitID = "player"},	-- 无拘移动药水
+		{AuraID = 322302, UnitID = "player"},	-- 献祭心能药水
+		{AuraID = 307160, UnitID = "player"},	-- 硬化暗影药水
 		-- 9.0饰品
+		{AuraID = 344231, UnitID = "player"},	-- 赤红陈酿
 		{AuraID = 345228, UnitID = "player"},	-- 角斗士徽章
 		{AuraID = 344662, UnitID = "player"},	-- 碎裂心智
 		{AuraID = 345439, UnitID = "player"},	-- 赤红华尔兹
@@ -107,6 +112,8 @@ local list = {
 		{AuraID = 328908, UnitID = "player"},	-- 战斗冥想
 		{AuraID = 345499, UnitID = "player"},	-- 执政官的祝福
 		{AuraID = 339461, UnitID = "player"},	-- 猎手坚韧
+		{AuraID = 325381, UnitID = "player", Flash = true},	-- 争先打击
+		{AuraID = 342774, UnitID = "player"},	-- 繁华原野
 		-- 炼金石
 		{AuraID = 60233, UnitID = "player"},	-- 敏捷
 		{AuraID = 60229, UnitID = "player"},	-- 力量
@@ -195,6 +202,7 @@ local list = {
 		{AuraID = 331399, UnitID = "player"},	-- 凋魂之殇，感染毒雨
 		{AuraID = 327401, UnitID = "player", Flash = true},	-- 通灵战潮，共受苦难
 		{AuraID = 323471, UnitID = "player", Flash = true},	-- 通灵战潮，切肉飞刀
+		{AuraID = 328181, UnitID = "player"},	-- 通灵战潮，凌冽之寒
 		{AuraID = 327397, UnitID = "player"},	-- 通灵战潮，严酷命运
 		{AuraID = 322681, UnitID = "player"},	-- 通灵战潮，肉钩
 		{AuraID = 335161, UnitID = "player"},	-- 通灵战潮，残存心能
