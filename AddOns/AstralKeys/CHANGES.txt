@@ -1,10 +1,16 @@
-lightweight tag a5fa5b22ee97267589c60ab2b725a4f018d4a408 3.38
-Author:	GitHub <noreply@github.com>
-Date:	Sat Jan 23 21:24:28 2021 -0500
+lightweight tag f068c65cd40f39472d833fa7bac459915ae6c471 3.39-archived
+Author:	sinfonianartist <sinfonianartist@gmail.com>
+Date:	Thu Mar 11 09:10:08 2021 -0500
 
-commit 5817837e07d47cd6038495f81b746862d7a3e0aa
+commit 6c72da7ad67d0cc87286dc4af502d7fa670c04de
 Author: sinfonianartist <sinfonianartist@gmail.com>
-Date:   Sat Jan 23 21:23:27 2021 -0500
+Date:   Thu Mar 11 09:09:33 2021 -0500
 
-    Version Bump to 3.38
+    Updated German Localization
+
+commit 6c72da7ad67d0cc87286dc4af502d7fa670c04de
+Author: sinfonianartist <sinfonianartist@gmail.com>
+Date:   Thu Mar 11 09:09:33 2021 -0500
+
+    Updated German Localization
 

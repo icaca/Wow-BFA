@@ -35,7 +35,8 @@ local specTemplate = {
     aoe = 2,
     cycle = false,
     cycle_min = 6,
-    gcdSync = true,
+    gcdSync = false,
+    enhancedRecheck = false,
 
     buffPadding = 0,
     debuffPadding = 0,
@@ -497,9 +498,10 @@ local HekiliSpecMixin = {
                     if a.item and a.item ~= 158075 then
                         a.itemSpellName, a.itemSpellID = GetItemSpell( a.item )
 
-                        if a.itemSpellName == a.name then                    
+                        if a.itemSpellName == a.name then
                             a.itemSpellKey = a.key .. "_" .. a.itemSpellID
                             self.abilities[ a.itemSpellKey ] = a
+                            class.abilities[ a.itemSpellKey ] = a
 
                         elseif a.itemSpellName then
                             local itemAura = self.auras[ a.itemSpellName ]
@@ -507,6 +509,7 @@ local HekiliSpecMixin = {
                             if itemAura then
                                 a.itemSpellKey = itemAura.key .. "_" .. a.itemSpellID
                                 self.abilities[ a.itemSpellKey ] = a
+                                class.abilities[ a.itemSpellKey ] = a
                                 
                             else
                                 if self.pendingItemSpells[ a.itemSpellName ] then
@@ -2101,7 +2104,12 @@ all:RegisterAbilities( {
         cooldown = 120,
         gcd = "off",
 
-        usable = function () return boss and group end,
+        usable = function ()
+            if not boss or group then return false, "requires boss fight or group (to avoid resetting)" end
+            if moving then return false, "can't shadowmeld while moving" end
+            return true
+        end,
+
         handler = function ()
             applyBuff( "shadowmeld" )
         end,
@@ -2285,6 +2293,7 @@ all:RegisterAbilities( {
         end,
 
         usable = function () return args.buff_name ~= nil, "no buff name detected" end,
+        timeToReady = function () return gcd.remains end,
         handler = function ()
             removeBuff( args.buff_name )
         end,

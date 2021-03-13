@@ -256,7 +256,10 @@ G.DefaultSettings = {
 		ExecuteRatio = 0,
 		ColoredTarget = false,
 		TargetColor = {r=0, g=.6, b=1},
+		ColoredFocus = false,
+		FocusColor = {r=1, g=.8, b=0},
 		CastbarGlow = true,
+		CastTarget = false,
 	},
 	Skins = {
 		DBM = true,
@@ -336,13 +339,15 @@ G.DefaultSettings = {
 		RaidTool = true,
 		RMRune = false,
 		DBMCount = "10",
-		EasyMarking = true,
+		EasyMarkKey = 1,
 		ShowMarkerBar = 4,
 		BlockInvite = false,
 		NzothVision = true,
 		SendActionCD = false,
 		MawThreatBar = true,
 		MDGuildBest = true,
+		FasterSkip = false,
+		EnhanceDressup = true,
 	},
 	Tutorial = {
 		Complete = false,
@@ -746,13 +751,13 @@ G.TabList = {
 	NewFeatureTag..L["Nameplate"],
 	L["PlayerPlate"],
 	L["Auras"],
-	L["Raid Tools"],
+	NewFeatureTag..L["Raid Tools"],
 	L["ChatFrame"],
 	L["Maps"],
 	L["Skins"],
 	L["Tooltip"],
 	NewFeatureTag..L["Misc"],
-	NewFeatureTag..L["UI Settings"],
+	L["UI Settings"],
 	L["Profile"],
 }
 
@@ -869,20 +874,23 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{1, "Nameplate", "Enable", HeaderTag..L["Enable Nameplate"], nil, setupNameplateFilter},
 		{1, "Nameplate", "NameOnlyMode", L["NameOnlyMode"].."*", true, nil, nil, L["NameOnlyModeTip"]},
 		{},--blank
-		{1, "Nameplate", "FriendlyCC", L["Friendly CC"].."*"},
-		{1, "Nameplate", "HostileCC", L["Hostile CC"].."*"},
+		{4, "Nameplate", "TargetIndicator", L["TargetIndicator"].."*", nil, {DISABLE, L["TopArrow"], L["RightArrow"], L["TargetGlow"], L["TopNGlow"], L["RightNGlow"]}, refreshNameplates},
 		{4, "Nameplate", "AuraFilter", L["NameplateAuraFilter"].."*", true, {L["BlackNWhite"], L["PlayerOnly"], L["IncludeCrowdControl"]}, refreshNameplates},
+		{1, "Nameplate", "FriendlyCC", L["Friendly CC"].."*"},
+		{1, "Nameplate", "HostileCC", L["Hostile CC"].."*", true},
 		{1, "Nameplate", "FullHealth", L["Show FullHealth"].."*", nil, nil, refreshNameplates},
 		{1, "Nameplate", "ColorBorder", L["ColorBorder"].."*", true, nil, refreshNameplates},
 		{1, "Nameplate", "InsideView", L["Nameplate InsideView"].."*", nil, nil, updatePlateInsideView},
 		{1, "Nameplate", "ExplosivesScale", L["ExplosivesScale"], true, nil, nil, L["ExplosivesScaleTip"]},
 		{1, "Nameplate", "QuestIndicator", L["QuestIndicator"]},
 		{1, "Nameplate", "AKSProgress", L["AngryKeystones Progress"], true},
-		{1, "Nameplate", "CastbarGlow", NewFeatureTag..L["PlateCastbarGlow"].."*", nil, setupPlateCastbarGlow, nil, L["PlateCastbarGlowTip"]},
+		{1, "Nameplate", "CastbarGlow", L["PlateCastbarGlow"].."*", nil, setupPlateCastbarGlow, nil, L["PlateCastbarGlowTip"]},
+		{1, "Nameplate", "CastTarget", NewFeatureTag..L["PlateCastTarget"].."*", true, nil, nil, L["PlateCastTargetTip"]},
 		{},--blank
 		{1, "Nameplate", "ColoredTarget", HeaderTag..L["ColoredTarget"].."*", nil, nil, nil, L["ColoredTargetTip"]},
+		{1, "Nameplate", "ColoredFocus", NewFeatureTag..HeaderTag..L["ColoredFocus"].."*", true, nil, nil, L["ColoredFocusTip"]},
 		{5, "Nameplate", "TargetColor", L["TargetNP Color"].."*"},
-		{4, "Nameplate", "TargetIndicator", L["TargetIndicator"].."*", true, {DISABLE, L["TopArrow"], L["RightArrow"], L["TargetGlow"], L["TopNGlow"], L["RightNGlow"]}, refreshNameplates},
+		{5, "Nameplate", "FocusColor", L["FocusNP Color"].."*", 2},
 		{},--blank
 		{1, "Nameplate", "CustomUnitColor", HeaderTag..L["CustomUnitColor"].."*", nil, nil, updateCustomUnitList, L["CustomUnitColorTip"]},
 		{5, "Nameplate", "CustomColor", L["Custom Color"].."*", 2},
@@ -911,7 +919,7 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{1, "Nameplate", "ShowPlayerPlate", HeaderTag..L["Enable PlayerPlate"]},
 		{},--blank
 		{1, "Auras", "ClassAuras", L["Enable ClassAuras"]},
-		{1, "Nameplate", "PPOnFire", NewFeatureTag..L["PlayerPlate OnFire"], true, nil, nil, L["PPOnFireTip"]},
+		{1, "Nameplate", "PPOnFire", L["PlayerPlate OnFire"], true, nil, nil, L["PPOnFireTip"]},
 		{1, "Nameplate", "NameplateClassPower", L["Nameplate ClassPower"], nil},
 		{1, "Nameplate", "PPFadeout", L["PlayerPlate Fadeout"].."*", true, nil, togglePlateVisibility},
 		{1, "Nameplate", "PPPowerText", L["PlayerPlate PowerText"].."*", nil, nil, togglePlatePower},
@@ -946,9 +954,9 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 	[8] = {
 		{1, "Misc", "RaidTool", HeaderTag..L["Raid Manger"]},
 		{1, "Misc", "RMRune", L["Runes Check"].."*"},
-		{1, "Misc", "EasyMarking", L["Easy Mark"].."*", true},
-		{2, "Misc", "DBMCount", L["DBMCount"].."*", nil, nil, nil, L["DBMCountTip"]},
-		{4, "Misc", "ShowMarkerBar", L["ShowMarkerBar"].."*", true, {L["Grids"], L["Horizontal"], L["Vertical"], DISABLE}, updateMarkerGrid},
+		{2, "Misc", "DBMCount", L["DBMCount"].."*", true, nil, nil, L["DBMCountTip"]},
+		{4, "Misc", "EasyMarkKey", NewFeatureTag..L["EasyMark"].."*", nil, {"CTRL", "ALT", "SHIFT", DISABLE}, nil, L["EasyMarkTip"]},
+		{4, "Misc", "ShowMarkerBar", L["ShowMarkerBar"].."*", true, {L["Grids"], L["Horizontal"], L["Vertical"], DISABLE}, updateMarkerGrid, L["ShowMarkerBarTip"]},
 		{},--blank
 		{1, "Misc", "QuestNotification", HeaderTag..L["QuestNotification"].."*", nil, nil, updateQuestNotification},
 		{1, "Misc", "QuestProgress", L["QuestProgress"].."*"},
@@ -1056,7 +1064,7 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{1, "Tooltip", "ConduitInfo", HeaderTag..L["Show ConduitInfo"]},
 	},
 	[13] = {
-		{1, "Misc", "ItemLevel", HeaderTag..L["Show ItemLevel"]},
+		{1, "Misc", "ItemLevel", HeaderTag..L["Show ItemLevel"], nil, nil, nil, L["ItemLevelTip"]},
 		{1, "Misc", "GemNEnchant", L["Show GemNEnchant"].."*"},
 		{1, "Misc", "AzeriteTraits", L["Show AzeriteTraits"].."*", true},
 		{},--blank
@@ -1066,6 +1074,8 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{1, "Misc", "HideBossBanner", L["Hide Bossbanner"].."*", true, nil, toggleBossBanner},
 		{1, "Misc", "InstantDelete", L["InstantDelete"].."*"},
 		{1, "Misc", "FasterLoot", L["Faster Loot"].."*", true, nil, updateFasterLoot},
+		{1, "Misc", "BlockInvite", "|cffff0000"..L["BlockInvite"].."*", nil, nil, nil, L["BlockInviteTip"]},
+		{1, "Misc", "FasterSkip", NewFeatureTag..L["FasterMovieSkip"], true, nil, nil, L["FasterMovieSkipTip"]},
 		{},--blank
 		{1, "Misc", "MissingStats", L["Show MissingStats"]},
 		{1, "Misc", "ParagonRep", L["ParagonRep"], true},
@@ -1074,9 +1084,9 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{1, "Misc", "PetFilter", L["Show PetFilter"]},
 		{1, "Misc", "Screenshot", L["Auto ScreenShot"].."*", true, nil, updateScreenShot},
 		{1, "Misc", "Focuser", L["Easy Focus"]},
-		{1, "Misc", "BlockInvite", "|cffff0000"..L["BlockInvite"].."*", true, nil, nil, L["BlockInviteTip"]},
+		{1, "Misc", "MDGuildBest", L["MDGuildBest"], true, nil, nil, L["MDGuildBestTip"]},
 		{1, "Misc", "MawThreatBar", L["MawThreatBar"], nil, nil, nil, L["MawThreatBarTip"]},
-		{1, "Misc", "MDGuildBest", NewFeatureTag..L["MDGuildBest"], true, nil, nil, L["MDGuildBestTip"]},
+		{1, "Misc", "EnhanceDressup", NewFeatureTag..L["EnhanceDressup"], true, nil, nil, L["EnhanceDressupTip"]},
 	},
 	[14] = {
 		{1, "ACCOUNT", "VersionCheck", L["Version Check"]},
@@ -1087,7 +1097,7 @@ G.OptionList = { -- type, key, value, name, horizon, doubleline
 		{},--blank
 		{4, "ACCOUNT", "TexStyle", L["Texture Style"], false, {}},
 		{4, "ACCOUNT", "NumberFormat", L["Numberize"], true, {L["Number Type1"], L["Number Type2"], L["Number Type3"]}},
-		{2, "ACCOUNT", "CustomTex", NewFeatureTag..L["CustomTex"], nil, nil, nil, L["CustomTexTip"]},
+		{2, "ACCOUNT", "CustomTex", L["CustomTex"], nil, nil, nil, L["CustomTexTip"]},
 	},
 	[15] = {
 	},

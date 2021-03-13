@@ -518,6 +518,7 @@ local packTemplate = {
     desc = "This is a package of action lists for Hekili.",
     source = "",
     date = date("%Y-%m-%d %H:%M"),
+    warnings = "",
 
     hidden = false,
 
@@ -4880,10 +4881,20 @@ do
                                 gcdSync = {
                                     type = "toggle",
                                     name = "Start after Global Cooldown",
-                                    desc = "If checked, the addon's first recommendation will be delayed to the start of the GCD in your Primary and AOE displays.  This can reduce flickering if trinkets or off-GCD abilities are appearing briefly during the global cooldown.",
+                                    desc = "If checked, the addon's first recommendation will be delayed to the start of the GCD in your Primary and AOE displays.  This can reduce flickering if trinkets or off-GCD abilities are appearing briefly during the global cooldown, " ..
+                                        "but will cause abilities intended to be used while the GCD is active (i.e., Recklessness) to bounce backward in the queue.",
                                     width = "full",
                                     order = 4,
                                 },
+
+                                enhancedRecheck = {
+                                    type = "toggle",
+                                    name = "Enhanced Recheck",
+                                    desc = "When the addon cannot recommend an ability at the present time, it rechecks action's conditions at a few points in the future.  If checked, this feature will enable the addon to do additional checking on entries that use the 'variable' feature.  " ..
+                                        "This may use slightly more CPU, but can reduce the likelihood that the addon will fail to make a recommendation.",
+                                    width = "full",
+                                    order = 5,
+                                }
 
                             }
                         }
@@ -5120,6 +5131,7 @@ do
         if not data then return end
 
         if option == 'date' then return tostring( data.date ) end
+
         return data[ option ]
     end
 
@@ -5141,6 +5153,12 @@ do
         if not data then return end
 
         if type( val ) == 'string' then val = val:trim() end
+        
+        if option == "desc" then
+            -- Auto-strip comments prefix
+            val = val:gsub( "^#+ ", "" )
+            val = val:gsub( "\n#+ ", "\n" )
+        end
 
         data[ option ] = val
     end
@@ -5853,7 +5871,7 @@ do
                                     type = "description",
                                     name = function ()
                                         local p = rawget( Hekili.DB.profile.packs, pack )
-                                        return "|cFFFFD100Import Log|r\n" .. ( p.warnings ) .. "\n\n"
+                                        return "|cFFFFD100Import Log|r\n" .. ( p.warnings or "" ) .. "\n\n"
                                     end,
                                     order = 5,
                                     fontSize = "medium",
