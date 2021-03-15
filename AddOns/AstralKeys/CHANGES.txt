@@ -1,16 +1,10 @@
-lightweight tag f068c65cd40f39472d833fa7bac459915ae6c471 3.39-archived
+lightweight tag b7b958b08e80df73ffadc58a1d2ae981b8ca4c89 3.41
 Author:	sinfonianartist <sinfonianartist@gmail.com>
-Date:	Thu Mar 11 09:10:08 2021 -0500
+Date:	Fri Mar 12 20:22:37 2021 -0500
 
-commit 6c72da7ad67d0cc87286dc4af502d7fa670c04de
+commit b7b958b08e80df73ffadc58a1d2ae981b8ca4c89
 Author: sinfonianartist <sinfonianartist@gmail.com>
-Date:   Thu Mar 11 09:09:33 2021 -0500
+Date:   Fri Mar 12 20:22:08 2021 -0500
 
-    Updated German Localization
-
-commit 6c72da7ad67d0cc87286dc4af502d7fa670c04de
-Author: sinfonianartist <sinfonianartist@gmail.com>
-Date:   Thu Mar 11 09:09:33 2021 -0500
-
-    Updated German Localization
+    Update to 3.41
 
