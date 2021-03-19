@@ -868,7 +868,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                 else
                                     -- Target Cycling.
                                     -- We have to determine *here* whether the ability would be used on the current target or a different target.
-                                    if state.args.cycle_targets == 1 and state.settings.cycle then
+                                    if state.args.cycle_targets == 1 and state.settings.cycle and state.active_enemies > 1 then
                                         state.SetupCycle( ability )
 
                                         if state.cycle_enemies == 1 then
@@ -1070,7 +1070,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                             state.selected_action = rAction
                                                         end
 
-                                                    elseif action == "wait" then
+                                                    --[[ elseif action == "wait" then
                                                         -- local args = scripts:GetModifiers()
                                                         -- local args = ns.getModifiers( listID, actID )
                                                         local sec = state.args.sec or 0.5
@@ -1081,9 +1081,55 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                             else
                                                                 if debug then self:Debug( "Criteria for Wait action were met, advancing by %.2f and restarting this list.", sec ) end
                                                                 -- NOTE, WE NEED TO TELL OUR INCREMENT FUNCTION ABOUT THIS...
-                                                                waitBlock[ scriptID ] = true
+                                                                -- waitBlock[ scriptID ] = true
                                                                 state.advance( sec )
                                                                 actID = 0
+                                                            end
+                                                        end ]]
+
+                                                    elseif action == "wait" then
+                                                        local sec = state.args.sec or 0.5
+
+                                                        if sec <= 0 then
+                                                            if debug then self:Debug( "Invalid wait value ( %.2f ); skipping...", sec ) end
+                                                        else
+                                                            slot.scriptType = "simc"
+                                                            slot.script = scriptID
+                                                            slot.hook = caller
+
+                                                            slot.display = dispName
+                                                            slot.pack = packName
+                                                            slot.list = listName
+                                                            slot.listName = listName
+                                                            slot.action = actID
+                                                            slot.actionName = state.this_action
+                                                            slot.actionID = ability.id
+
+                                                            slot.caption = ability.caption or entry.caption
+                                                            slot.texture = ability.texture
+                                                            slot.indicator = ability.indicator
+
+                                                            if ability.interrupt and state.buff.casting.up then
+                                                                slot.interrupt = true
+                                                                slot.castStart = state.buff.casting.applied
+                                                            else
+                                                                slot.interrupt = nil
+                                                                slot.castStart = nil
+                                                            end
+                                                            
+                                                            slot.wait = state.delay
+                                                            slot.waitSec = sec
+
+                                                            slot.resource = state.GetResourceType( rAction )
+
+                                                            rAction = state.this_action
+                                                            rWait = state.delay
+
+                                                            state.selection_time = state.delay
+                                                            state.selected_action = rAction
+
+                                                            if debug then
+                                                                self:Debug( "Action chosen:  %s at %.2f!", rAction, state.delay )
                                                             end
                                                         end
                                                     
@@ -1091,7 +1137,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                         if state:IsChanneling() then state.canBreakChannel = true end
 
                                                     elseif action == "pool_resource" then
-                                                        if state.args.for_next == 1 and false then
+                                                        if state.args.for_next == 1 then
                                                             -- Pooling for the next entry in the list.
                                                             local next_entry  = list[ actID + 1 ]
                                                             local next_action = next_entry and next_action
@@ -1178,6 +1224,7 @@ function Hekili:GetPredictionFromAPL( dispName, packName, listName, slot, action
                                                         end
                                                         
                                                         slot.wait = state.delay
+                                                        slot.waitSec = nil
 
                                                         slot.resource = state.GetResourceType( rAction )
 
@@ -1415,7 +1462,7 @@ function Hekili:ProcessHooks( dispName, packName )
                 if debug then self:Debug( -100, "Addon used %.2fms CPU time (of %.2fms softcap) before recommendation #%d; stopping early.", usedTime, maxTime, i-1 ) end
                 if not Hekili.HasSnapped then
                     Hekili.HasSnapped = true
-                    Hekili:MakeSnapshot( dispName )
+                    Hekili:MakeSnapshot( dispName, true )
                 end
                 break
             end
@@ -1458,7 +1505,7 @@ function Hekili:ProcessHooks( dispName, packName )
             if debugprofilestop() - actualStartTime > 100 then
                 if not Hekili.HasSnapped then
                     Hekili.HasSnapped = true
-                    Hekili:MakeSnapshot( dispName )
+                    Hekili:MakeSnapshot( dispName, true )
                 end
                 
                 if debug then self:Debug( "Escaping events loop due to high CPU usage." ) end
@@ -1602,11 +1649,42 @@ function Hekili:ProcessHooks( dispName, packName )
                         state.removeBuff( "casting" )
                     end
 
-                    action, wait, depth = self:GetNextPrediction( dispName, packName, slot )
+                    local waitLoop = 0
+
+                    repeat
+                        action, wait, depth = self:GetNextPrediction( dispName, packName, slot )
+
+                        if action == "wait" then
+                            if debug then Hekili:Debug( "EXECUTING WAIT ( %.2f ) EVENT AT ( +%.2f ) AND RECHECKING RECOMMENDATIONS...", slot.waitSec, wait ) end
+                            state.advance( wait + slot.waitSec )
+
+                            slot.action = nil
+                            slot.actionName = nil
+                            slot.actionID = nil
+                            action, wait = nil, 15
+
+                            action, wait, depth = self:GetNextPrediction( dispName, packName, slot )
+                        end
+                    
+                        waitLoop = waitLoop + 1
+                        
+                        if waitLoop > 2 then
+                            if debug then Hekili:Debug( "BREAKING WAIT LOOP!" ) end
+                            slot.action = nil
+                            slot.actionName = nil
+                            slot.actionID = nil
+                            action, wait = nil, 15        
+                            break
+                        end
+                    until action ~= "wait"
+
+                    if action == "wait" then
+                        action, wait = nil, 15
+                    end
 
                     if not action then
                         if debug then self:Debug( "Time spent on event #%d PREADVANCE: %.2fms...", n, debugprofilestop() - eStart ) end
-                        if debug then self:Debug( 1, "No recommendation found before event #%d (%s %s) at %.2f; triggering event and continuing ( %.2f ).\n", n, event.action, event.type, t, state.offset + state.delay ) end
+                        if debug then self:Debug( 1, "No recommendation found before event #%d (%s %s) at %.2f; triggering event and continuing ( %.2f ).\n", n, event.action or "NO ACTION", event.type or "NO TYPE", t, state.offset + state.delay ) end
                         
                         state.advance( overrideTime or t )
                         if debug then self:Debug( "Time spent on event #%d POSTADVANCE: %.2fms...", n, debugprofilestop() - eStart ) end
@@ -1651,7 +1729,40 @@ function Hekili:ProcessHooks( dispName, packName )
                 end
             end    
 
-            action, wait, depth = self:GetNextPrediction( dispName, packName, slot )
+            local waitLoop = 0
+            
+            repeat
+                action, wait, depth = self:GetNextPrediction( dispName, packName, slot )
+
+                if action == "wait" then
+                    if debug then Hekili:Debug( "EXECUTING WAIT ( %.2f ) EVENT AT ( +%.2f ) AND RECHECKING RECOMMENDATIONS...", slot.waitSec, wait ) end
+                    state.advance( wait + slot.waitSec )
+                    
+                    slot.action = nil
+                    slot.actionName = nil
+                    slot.actionID = nil
+                    action, wait = nil, 15
+
+                    action, wait, depth = self:GetNextPrediction( dispName, packName, slot )
+                end
+            
+                waitLoop = waitLoop + 1
+                
+                if waitLoop > 2 then
+                    if debug then Hekili:Debug( "BREAKING WAIT LOOP!" ) end
+
+                    slot.action = nil
+                    slot.actionName = nil
+                    slot.actionID = nil
+                    action, wait = nil, 15
+
+                    break
+                end
+            until action ~= "wait"
+
+            if action == "wait" then
+                action, wait = nil, 15
+            end
         end
 
         local gcd_remains = state.cooldown.global_cooldown.remains
@@ -1660,9 +1771,9 @@ function Hekili:ProcessHooks( dispName, packName )
         -- if debug then self:Debug( "Prediction engine would recommend %s at +%.2fs (%.2fs).\n", action or "NO ACTION", wait or 60, state.offset + state.delay ) end
         if debug then self:Debug( "Recommendation #%d is %s at %.2fs (%.2fs).", i, action or "NO ACTION", wait or 60, state.offset + state.delay ) end
 
-        if not debug and not Hekili.Config and not Hekili.HasSnapped and ( dispName == "Primary" or dispName == "AOE" ) and action == nil and Hekili.DB.profile.autoSnapshot and InCombatLockdown() and state.level >= 50 then
+        if not debug and not Hekili.Config and not Hekili.HasSnapped and ( dispName == "Primary" or dispName == "AOE" ) and action == nil and InCombatLockdown() and state.level >= 50 then
             Hekili.HasSnapped = true
-            Hekili:MakeSnapshot( dispName )
+            Hekili:MakeSnapshot( dispName, true )
             return
         end
 
