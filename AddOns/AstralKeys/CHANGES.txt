@@ -1,10 +1,47 @@
-lightweight tag b7b958b08e80df73ffadc58a1d2ae981b8ca4c89 3.41
-Author:	sinfonianartist <sinfonianartist@gmail.com>
-Date:	Fri Mar 12 20:22:37 2021 -0500
+lightweight tag ab847aafa53c43ecee5bcf67a4eb262d42221364 3.42-Release
+Author:	GitHub <noreply@github.com>
+Date:	Mon Mar 29 20:45:12 2021 -0400
 
-commit b7b958b08e80df73ffadc58a1d2ae981b8ca4c89
-Author: sinfonianartist <sinfonianartist@gmail.com>
-Date:   Fri Mar 12 20:22:08 2021 -0500
+commit 48ba95fe74fc5013a4b486713cf5e7e42b2faca7
+Author: Aaron <45137170+maestrohdude@users.noreply.github.com>
+Date:   Mon Mar 29 10:57:39 2021 -0700
 
-    Update to 3.41
+    Update deDE.lua
+    
+    One small change for syntax consistency.
+
+commit 48ba95fe74fc5013a4b486713cf5e7e42b2faca7
+Author: Aaron <45137170+maestrohdude@users.noreply.github.com>
+Date:   Mon Mar 29 10:57:39 2021 -0700
+
+    Update deDE.lua
+    
+    One small change for syntax consistency.
+
+commit 48ba95fe74fc5013a4b486713cf5e7e42b2faca7
+Author: Aaron <45137170+maestrohdude@users.noreply.github.com>
+Date:   Mon Mar 29 10:57:39 2021 -0700
+
+    Update deDE.lua
+    
+    One small change for syntax consistency.
+
+commit 3d840d3e0edc6e1dee87063731b98e684c2cfbe4
+Author: Fylwind <fyl@wolfpa.ws>
+Date:   Sun Mar 28 19:33:02 2021 -0700
+
+    Key Information.lua: Store player key info in correct format
+    
+    In Key Information.lua, information about the current player is
+    populated using numeric indices instead of string keys. Subsequent
+    lookups of this information would fail.
+    
+    The bug seems to be masked for players in guilds since the guild scan
+    will also repopulate the player's key information in the correct format,
+    so the issue only gets observed by players without guilds:
+    https://github.com/astralguild/AstralKeys/issues/10#issuecomment-774513943
+    
+    The version has been bumped to 3.42.
+    
+    Fixes #7 and #10.
 
