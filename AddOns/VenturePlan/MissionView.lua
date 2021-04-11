@@ -623,8 +623,14 @@ end
 local function MissionGroup_OnUpdate()
 	Tact:CheckBoard(true)
 	local o = GameTooltip:IsVisible() and GameTooltip:GetOwner() or GetMouseFocus()
-	if o and not o:IsForbidden() and o:GetScript("OnEnter") and o:GetParent():GetParent() == CovenantMissionFrame.MissionTab.MissionPage.Board then
-		o:GetScript("OnEnter")(o)
+	if o and not o:IsForbidden() and o.GetScript then
+		local l, p, t = 3, o, CovenantMissionFrame.MissionTab.MissionPage.Board
+		while p and p ~= t and l > 0 and p.GetParent and p.IsForbidden and not p:IsForbidden() do
+			l, p = l-1, p:GetParent()
+		end
+		if p == t then
+			o:GetScript("OnEnter")(o)
+		end
 	end
 	FollowerList:SyncToBoard()
 end
@@ -693,7 +699,6 @@ local function Mission_Start()
 	local g, hc = MissionView_GetGroup()
 	if hc then
 		U.StartMissionWithDelay(mid, g)
-		PlaySound(158565)
 		CovenantMissionFrame:CloseMission()
 	end
 end
@@ -744,8 +749,9 @@ local function Shuffler_OnUpdate(self)
 	if fin then
 		self:SetScript("OnUpdate", nil)
 		if g then
+			Shuffler_AssignGroup(g)
 			Shuffler_OnLeave(self)
-			return Shuffler_AssignGroup(g)
+			return
 		end
 	end
 	if GameTooltip:IsOwned(self) then
