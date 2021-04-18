@@ -265,8 +265,8 @@ local TP = {} do
 				if tu and tu.curHP > 0 and not tu.shroud then
 					stt[1], ni, ot = 0, 2
 				else
-					local t1, t2 = board[1], board[2]
-					if not (t1 and t1.curHP > 0 and not t1.shroud) and (t2 and t2.curHP > 0 and not t2.shroud) then
+					local t2 = board[2]
+					if t2 and t2.curHP > 0 and not t2.shroud then
 						stt[1], ni, ot = 2, 2
 						for i=5,6 do
 							tu = board[i]

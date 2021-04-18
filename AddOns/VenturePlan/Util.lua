@@ -180,16 +180,16 @@ do -- Tentative Groups
 	end
 	function U.StoreMissionGroup(mid, gt, disbandGroups)
 		if gt and next(gt) ~= nil then
-			for _, v in pairs(gt) do
+			local gn = {}
+			for k, v in pairs(gt) do
 				U.ReleaseTentativeFollower(v, disbandGroups, true)
-			end
-			groups[mid] = gt
-			for _, v in pairs(gt) do
+				gn[k] = v
 				if not autoTroops[v] then
 					followerMissionID[v] = mid
 					healthyCompanions[v] = nil
 				end
 			end
+			groups[mid] = gn
 			EV("I_TENTATIVE_GROUPS_CHANGED")
 		elseif gt == nil and groups[mid] then
 			for _, v in pairs(groups[mid]) do

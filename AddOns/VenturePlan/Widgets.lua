@@ -738,10 +738,11 @@ local function DoomRun_OnClick(self, button)
 	if GameTooltip:IsOwned(self) then
 		GameTooltip:Hide()
 	end
-	U.StoreMissionGroup(mid, g)
-	PlaySound(SOUNDKIT.U_CHAT_SCROLL_BUTTON)
 	if button == "RightButton" then
 		U.StartMissionWithDelay(mid, g)
+	else
+		U.StoreMissionGroup(mid, g)
+		PlaySound(SOUNDKIT.U_CHAT_SCROLL_BUTTON)
 	end
 	EV("I_MISSION_LIST_UPDATE")
 end
@@ -1336,7 +1337,7 @@ function Factory.MissionButton(parent)
 		s.Rewards[j] = rew
 	end
 	t = CreateObject("AchievementRewardIcon", cf)
-	t:SetPoint("RIGHT", cf, "TOPRIGHT", -20, -40)
+	t:SetPoint("RIGHT", cf, "TOPRIGHT", -25, -40)
 	s.AchievementReward = t
 
 	t = CreateFrame("Frame", nil, cf)
