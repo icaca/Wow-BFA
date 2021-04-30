@@ -110,6 +110,11 @@ function G:SetupRaidDebuffs(parent)
 	local raids = {
 		[1] = EJ_GetInstanceInfo(1190),
 	}
+	if DB.isNewPatch then
+		raids[2] = EJ_GetInstanceInfo(1193)
+		local newInst = EJ_GetInstanceInfo(1194)
+		tinsert(dungeons, newInst)
+	end
 
 	options[1] = G:CreateDropdown(frame, DUNGEONS.."*", 120, -30, dungeons, L["Dungeons Intro"], 130, 30)
 	options[1]:Hide()
@@ -840,10 +845,10 @@ function G:SetupUnitFrame(parent)
 	local scroll = G:CreateScroll(panel, 260, 540)
 
 	local sliderRange = {
-		["Player"] = {200, 300},
-		["Focus"] = {150, 250},
+		["Player"] = {150, 300},
+		["Focus"] = {150, 300},
 		["Pet"] = {100, 200},
-		["Boss"] = {100, 250},
+		["Boss"] = {100, 300},
 	}
 
 	local defaultValue = {

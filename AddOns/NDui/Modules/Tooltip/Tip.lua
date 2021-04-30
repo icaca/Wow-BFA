@@ -35,8 +35,8 @@ function TT:GetUnit()
 end
 
 function TT:HideLines()
-    for i = 3, self:NumLines() do
-        local tiptext = _G["GameTooltipTextLeft"..i]
+	for i = 3, self:NumLines() do
+		local tiptext = _G["GameTooltipTextLeft"..i]
 		local linetext = tiptext:GetText()
 		if linetext then
 			if linetext == PVP then
@@ -58,7 +58,7 @@ function TT:HideLines()
 				end
 			end
 		end
-    end
+	end
 end
 
 function TT:GetLevelLine()
@@ -382,7 +382,7 @@ function TT:ReskinTooltip()
 		self.tipStyled = true
 	end
 
-	self.bg:SetBackdropBorderColor(0, 0, 0)
+	B.SetBorderColor(self.bg)
 	if C.db["Tooltip"]["ClassColor"] and self.GetItem then
 		local _, item = self:GetItem()
 		if item then
@@ -610,10 +610,16 @@ end)
 
 TT:RegisterTooltips("Blizzard_DebugTools", function()
 	TT.ReskinTooltip(FrameStackTooltip)
-	TT.ReskinTooltip(EventTraceTooltip)
 	FrameStackTooltip:SetScale(UIParent:GetScale())
-	EventTraceTooltip:SetParent(UIParent)
-	EventTraceTooltip:SetFrameStrata("TOOLTIP")
+	if not DB.isNewPatch then
+		TT.ReskinTooltip(EventTraceTooltip)
+		EventTraceTooltip:SetParent(UIParent)
+		EventTraceTooltip:SetFrameStrata("TOOLTIP")
+	end
+end)
+
+TT:RegisterTooltips("Blizzard_EventTrace", function()
+	TT.ReskinTooltip(EventTraceTooltip)
 end)
 
 TT:RegisterTooltips("Blizzard_Collections", function()
@@ -661,11 +667,4 @@ end)
 TT:RegisterTooltips("Blizzard_Calendar", function()
 	CalendarContextMenu:HookScript("OnShow", TT.ReskinTooltip)
 	CalendarInviteStatusContextMenu:HookScript("OnShow", TT.ReskinTooltip)
-end)
-
-TT:RegisterTooltips("Blizzard_IslandsQueueUI", function()
-	local tooltip = IslandsQueueFrameTooltip:GetParent()
-	tooltip.IconBorder:SetAlpha(0)
-	tooltip.Icon:SetTexCoord(unpack(DB.TexCoord))
-	tooltip:GetParent():HookScript("OnShow", TT.ReskinTooltip)
 end)

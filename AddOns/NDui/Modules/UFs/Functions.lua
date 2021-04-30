@@ -398,7 +398,7 @@ function UF:CreatePortrait(self)
 	if not C.db["UFs"]["Portrait"] then return end
 
 	local portrait = CreateFrame("PlayerModel", nil, self.Health)
-	portrait:SetAllPoints()
+	portrait:SetInside()
 	portrait:SetAlpha(.2)
 	self.Portrait = portrait
 
@@ -885,6 +885,7 @@ function UF:CreateDebuffs(self)
 	bu.initialAnchor = "TOPRIGHT"
 	bu["growth-x"] = "LEFT"
 	bu["growth-y"] = "DOWN"
+	bu.tooltipAnchor = "ANCHOR_BOTTOMLEFT"
 	if mystyle == "player" then
 		bu:SetPoint("TOPRIGHT", self.Power, "BOTTOMRIGHT", 0, -10)
 		bu.num = 14
@@ -916,9 +917,24 @@ function UF.PostUpdateClassPower(element, cur, max, diff, powerType, chargedInde
 		for i = 1, 6 do
 			element[i].bg:Hide()
 		end
+
+		element.prevColor = nil
 	else
 		for i = 1, max do
 			element[i].bg:Show()
+		end
+
+		element.thisColor = cur == max and 1 or 2
+		if not element.prevColor or element.prevColor ~= element.thisColor then
+			local r, g, b = 1, 0, 0
+			if element.thisColor == 2 then
+				local color = element.__owner.colors.power[powerType]
+				r, g, b = color[1], color[2], color[3]
+			end
+			for i = 1, #element do
+				element[i]:SetStatusBarColor(r, g, b)
+			end
+			element.prevColor = element.thisColor
 		end
 	end
 
@@ -929,19 +945,6 @@ function UF.PostUpdateClassPower(element, cur, max, diff, powerType, chargedInde
 		for i = max + 1, 6 do
 			element[i].bg:Hide()
 		end
-	end
-
-	element.thisColor = cur == max and 1 or 2
-	if not element.prevColor or element.prevColor ~= element.thisColor then
-		local r, g, b = 1, 0, 0
-		if element.thisColor == 2 then
-			local color = element.__owner.colors.power[powerType]
-			r, g, b = color[1], color[2], color[3]
-		end
-		for i = 1, #element do
-			element[i]:SetStatusBarColor(r, g, b)
-		end
-		element.prevColor = element.thisColor
 	end
 
 	if chargedIndex and chargedIndex ~= element.thisCharge then
@@ -1113,27 +1116,30 @@ function UF:CreateExpRepBar(self)
 end
 
 function UF:CreatePrediction(self)
-	local mhpb = self:CreateTexture(nil, "BORDER", nil, 5)
+	local frame = CreateFrame("Frame", nil, self)
+	frame:SetAllPoints()
+
+	local mhpb = frame:CreateTexture(nil, "BORDER", nil, 5)
 	mhpb:SetWidth(1)
 	mhpb:SetTexture(DB.normTex)
 	mhpb:SetVertexColor(0, 1, .5, .5)
 
-	local ohpb = self:CreateTexture(nil, "BORDER", nil, 5)
+	local ohpb = frame:CreateTexture(nil, "BORDER", nil, 5)
 	ohpb:SetWidth(1)
 	ohpb:SetTexture(DB.normTex)
 	ohpb:SetVertexColor(0, 1, 0, .5)
 
-	local abb = self:CreateTexture(nil, "BORDER", nil, 5)
+	local abb = frame:CreateTexture(nil, "BORDER", nil, 5)
 	abb:SetWidth(1)
 	abb:SetTexture(DB.normTex)
 	abb:SetVertexColor(.66, 1, 1, .7)
 
-	local abbo = self:CreateTexture(nil, "ARTWORK", nil, 1)
+	local abbo = frame:CreateTexture(nil, "ARTWORK", nil, 1)
 	abbo:SetAllPoints(abb)
 	abbo:SetTexture("Interface\\RaidFrame\\Shield-Overlay", true, true)
 	abbo.tileSize = 32
 
-	local oag = self:CreateTexture(nil, "ARTWORK", nil, 1)
+	local oag = frame:CreateTexture(nil, "ARTWORK", nil, 1)
 	oag:SetWidth(15)
 	oag:SetTexture("Interface\\RaidFrame\\Shield-Overshield")
 	oag:SetBlendMode("ADD")
@@ -1141,14 +1147,15 @@ function UF:CreatePrediction(self)
 	oag:SetPoint("TOPLEFT", self.Health, "TOPRIGHT", -5, 2)
 	oag:SetPoint("BOTTOMLEFT", self.Health, "BOTTOMRIGHT", -5, -2)
 
-	local hab = CreateFrame("StatusBar", nil, self)
+	local hab = CreateFrame("StatusBar", nil, frame)
 	hab:SetPoint("TOPLEFT", self.Health)
 	hab:SetPoint("BOTTOMRIGHT", self.Health:GetStatusBarTexture())
 	hab:SetReverseFill(true)
 	hab:SetStatusBarTexture(DB.normTex)
 	hab:SetStatusBarColor(0, .5, .8, .5)
+	hab:SetFrameLevel(frame:GetFrameLevel())
 
-	local ohg = self:CreateTexture(nil, "ARTWORK", nil, 1)
+	local ohg = frame:CreateTexture(nil, "ARTWORK", nil, 1)
 	ohg:SetWidth(15)
 	ohg:SetTexture("Interface\\RaidFrame\\Absorb-Overabsorb")
 	ohg:SetBlendMode("ADD")
@@ -1166,6 +1173,7 @@ function UF:CreatePrediction(self)
 		overHealAbsorbGlow = ohg,
 		maxOverflow = 1,
 	}
+	self.predicFrame = frame
 end
 
 function UF.PostUpdateAddPower(element, cur, max)
@@ -1190,6 +1198,7 @@ function UF:CreateAddPower(self)
 	bar:SetStatusBarTexture(DB.normTex)
 	B.SetBD(bar, 0)
 	bar.colorPower = true
+	B:SmoothBar(bar)
 
 	local bg = bar:CreateTexture(nil, "BACKGROUND")
 	bg:SetAllPoints()

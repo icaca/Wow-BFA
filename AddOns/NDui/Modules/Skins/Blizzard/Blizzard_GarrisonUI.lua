@@ -94,6 +94,7 @@ local function ReskinMissionList(self)
 			local rareText = button.RareText
 
 			button.LocBG:SetDrawLayer("BACKGROUND")
+			if button.ButtonBG then button.ButtonBG:Hide() end
 			B.StripTextures(button)
 			B.CreateBDFrame(button, .25, true)
 			button.Highlight:SetColorTexture(.6, .8, 1, .15)
@@ -149,6 +150,8 @@ local function ReskinMissionComplete(self)
 	if missionComplete.MissionInfo then
 		B.StripTextures(missionComplete.MissionInfo)
 	end
+	if missionComplete.EnemyBackground then missionComplete.EnemyBackground:Hide() end
+	if missionComplete.FollowerBackground then missionComplete.FollowerBackground:Hide() end
 end
 
 local function ReskinFollowerTab(self)
@@ -1109,11 +1112,11 @@ C.themes["Blizzard_GarrisonUI"] = function()
 					B.StripTextures(widget)
 					B.CreateBDFrame(widget, 1)
 				elseif otype == "MissionToast" then
-					widget.Background:Hide()
-					widget.Icon:Show()
 					B.SetBD(widget)
-					widget.Outcome:SetFontObject("Game13Font")
-					widget.Detail:SetFontObject("Game13Font")
+					if widget.Icon then widget.Icon:Show() end
+					if widget.Background then widget.Background:Hide() end
+					if widget.Detail then widget.Detail:SetFontObject("Game13Font") end
+					if widget.Outcome then widget.Outcome:SetFontObject("Game13Font") end
 				end
 			end
 		end

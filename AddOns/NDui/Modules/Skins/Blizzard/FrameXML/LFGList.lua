@@ -1,6 +1,33 @@
 local _, ns = ...
 local B, C, L, DB = unpack(ns)
 
+local function Highlight_OnEnter(self)
+	self.hl:Show()
+end
+
+local function Highlight_OnLeave(self)
+	self.hl:Hide()
+end
+
+local function HandleRoleAnchor(self, role)
+	self[role.."Count"]:SetWidth(24)
+	self[role.."Count"]:SetFontObject(Game13Font)
+	self[role.."Count"]:SetPoint("RIGHT", self[role.."Icon"], "LEFT", 1, 0)
+end
+
+local atlasToRole = {
+	["groupfinder-icon-role-large-tank"] = "TANK",
+	["groupfinder-icon-role-large-heal"] = "HEALER",
+	["groupfinder-icon-role-large-dps"] = "DAMAGER",
+}
+local function ReplaceApplicantRoles(texture, atlas)
+	local role = atlasToRole[atlas]
+	if role then
+		texture:SetTexture(DB.rolesTex)
+		texture:SetTexCoord(B.GetRoleTexCoord(role))
+	end
+end
+
 tinsert(C.defaultThemes, function()
 	if not C.db["Skins"]["BlizzardSkins"] then return end
 
@@ -37,6 +64,14 @@ tinsert(C.defaultThemes, function()
 		end
 	end)
 
+	hooksecurefunc("LFGListSearchEntry_UpdateExpiration", function(self)
+		local expirationTime = self.ExpirationTime
+		if not expirationTime.fontStyled then
+			expirationTime:SetWidth(42)
+			expirationTime.fontStyled = true
+		end
+	end)
+
 	-- [[ Search panel ]]
 
 	local SearchPanel = LFGListFrame.SearchPanel
@@ -44,11 +79,7 @@ tinsert(C.defaultThemes, function()
 	B.Reskin(SearchPanel.RefreshButton)
 	B.Reskin(SearchPanel.BackButton)
 	B.Reskin(SearchPanel.SignUpButton)
-	if DB.isNewPatch then
-		B.Reskin(SearchPanel.ScrollFrame.ScrollChild.StartGroupButton)
-	else
-		B.Reskin(SearchPanel.ScrollFrame.StartGroupButton)
-	end
+	B.Reskin(SearchPanel.ScrollFrame.ScrollChild.StartGroupButton)
 	B.ReskinInput(SearchPanel.SearchBox)
 	B.ReskinScroll(SearchPanel.ScrollFrame.scrollBar)
 
@@ -56,14 +87,6 @@ tinsert(C.defaultThemes, function()
 	SearchPanel.RefreshButton.Icon:SetPoint("CENTER")
 	SearchPanel.ResultsInset:Hide()
 	B.StripTextures(SearchPanel.AutoCompleteFrame)
-
-	local function resultOnEnter(self)
-		self.hl:Show()
-	end
-
-	local function resultOnLeave(self)
-		self.hl:Hide()
-	end
 
 	local numResults = 1
 	hooksecurefunc("LFGListSearchPanel_UpdateAutoComplete", function(self)
@@ -92,8 +115,8 @@ tinsert(C.defaultThemes, function()
 			hl:Hide()
 			result.hl = hl
 
-			result:HookScript("OnEnter", resultOnEnter)
-			result:HookScript("OnLeave", resultOnLeave)
+			result:HookScript("OnEnter", Highlight_OnEnter)
+			result:HookScript("OnLeave", Highlight_OnLeave)
 
 			numResults = numResults + 1
 		end
@@ -104,14 +127,6 @@ tinsert(C.defaultThemes, function()
 	local ApplicationViewer = LFGListFrame.ApplicationViewer
 	ApplicationViewer.InfoBackground:Hide()
 	ApplicationViewer.Inset:Hide()
-
-	local function headerOnEnter(self)
-		self.hl:Show()
-	end
-
-	local function headerOnLeave(self)
-		self.hl:Hide()
-	end
 
 	for _, headerName in pairs({"NameColumnHeader", "RoleColumnHeader", "ItemLevelColumnHeader"}) do
 		local header = ApplicationViewer[headerName]
@@ -128,8 +143,8 @@ tinsert(C.defaultThemes, function()
 		hl:Hide()
 		header.hl = hl
 
-		header:HookScript("OnEnter", headerOnEnter)
-		header:HookScript("OnLeave", headerOnLeave)
+		header:HookScript("OnEnter", Highlight_OnEnter)
+		header:HookScript("OnLeave", Highlight_OnLeave)
 	end
 
 	ApplicationViewer.RoleColumnHeader:SetPoint("LEFT", ApplicationViewer.NameColumnHeader, "RIGHT", 1, 0)
@@ -149,6 +164,20 @@ tinsert(C.defaultThemes, function()
 			B.Reskin(button.InviteButton)
 
 			button.styled = true
+		end
+	end)
+
+	hooksecurefunc("LFGListApplicationViewer_UpdateRoleIcons", function(member)
+		if not member.styled then
+			for i = 1, 3 do
+				local button = member["RoleIcon"..i]
+				local texture = button:GetNormalTexture()
+				ReplaceApplicantRoles(texture, LFG_LIST_GROUP_DATA_ATLASES[button.role])
+				hooksecurefunc(texture, "SetAtlas", ReplaceApplicantRoles)
+				B.CreateBDFrame(button)
+			end
+
+			member.styled = true
 		end
 	end)
 
@@ -178,6 +207,13 @@ tinsert(C.defaultThemes, function()
 			B.ReskinRole(self.TankIcon, "TANK")
 			B.ReskinRole(self.HealerIcon, "HEALER")
 			B.ReskinRole(self.DamagerIcon, "DPS")
+
+			self.HealerIcon:SetPoint("RIGHT", self.DamagerIcon, "LEFT", -22, 0)
+			self.TankIcon:SetPoint("RIGHT", self.HealerIcon, "LEFT", -22, 0)
+
+			HandleRoleAnchor(self, "Tank")
+			HandleRoleAnchor(self, "Healer")
+			HandleRoleAnchor(self, "Damager")
 
 			self.styled = true
 		end
