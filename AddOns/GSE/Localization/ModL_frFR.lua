@@ -6,15 +6,15 @@ end
 local L = LibStub("AceLocale-3.0"):NewLocale("GSE", "frFR")
 
 -- Options translation
-L["  The Alternative ClassID is "] = "La ClassID alternative est"
+L["  The Alternative ClassID is "] = "La ClassID alternative est "
 --[[Translation missing --]]
 L[" Deleted Orphaned Macro "] = " Deleted Orphaned Macro "
 L[" from "] = "de"
-L[" has been added as a new version and set to active.  Please review if this is as expected."] = "a été ajouté comme une nouvelle version et a été activé. Veuillez vérifier que c'est voulu."
+L[" has been added as a new version and set to active.  Please review if this is as expected."] = "a été ajouté comme nouvelle version et a été activé. Veuillez vérifier si cela vous convient."
 L[" is not available.  Unable to translate sequence "] = "n'est pas disponible. Impossible de traduire la séquence"
 L[" macros per Account.  You currently have "] = "macros par compte. Vous en avez actuellement"
 L[" macros per character.  You currently have "] = "macros par compte. Vous en avez actuellement"
-L[" saved as version "] = "sauvez sous la version"
+L[" saved as version "] = "sauvé sous la version"
 L[" sent"] = "envoyé"
 L[" tried to overwrite the version already loaded from "] = "a essayé d'écraser la version déjà chargé depuis"
 L[" was imported as a new macro."] = "a été importé comme une nouvelle macro."
@@ -22,9 +22,8 @@ L[" was imported with the following errors."] = "a été importé avec les erreu
 L[" was updated to new version."] = "a été mis à jour sous une nouvelle version."
 --[[Translation missing --]]
 L["%sMACRO VALIDATION ERROR|r - PostMacro found with invalid LoopLimit.  PostMacro will not be saved for version %s"] = "%sMACRO VALIDATION ERROR|r - PostMacro found with invalid LoopLimit.  PostMacro will not be saved for version %s"
-L[". This version was not loaded."] = ". Cette version n'était pas chargé."
---[[Translation missing --]]
-L["/gs |r to get started."] = "/gs |r to get started."
+L[". This version was not loaded."] = ". Cette version n'a pas été chargé."
+L["/gs |r to get started."] = "/gs |r pour commencer."
 --[[Translation missing --]]
 L["/gs checkmacrosforerrors|r will loop through your macros and check for corrupt macro versions.  This will then show how to correct these issues."] = "/gs checkmacrosforerrors|r will loop through your macros and check for corrupt macro versions.  This will then show how to correct these issues."
 --[[Translation missing --]]
@@ -990,7 +989,6 @@ L["Your ClassID is "] = "Your ClassID is "
 L["Your current Specialisation is "] = "Your current Specialisation is "
 --[[Translation missing --]]
 L["Your sequence name was longer than 27 characters.  It has been shortened from %s to %s so that your macro will work."] = "Your sequence name was longer than 27 characters.  It has been shortened from %s to %s so that your macro will work."
-
 
 
 
