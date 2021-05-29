@@ -80,6 +80,11 @@ local list = {
 		{AuraID = 330367, UnitID = "player", Text = L["Versa"]},	-- 不可思议的量子装置，全能
 		{AuraID = 330368, UnitID = "player", Text = L["Haste"]},	-- 不可思议的量子装置，急速
 		{AuraID = 330380, UnitID = "player", Text = L["Mastery"]},	-- 不可思议的量子装置，精通
+		-- isNewPatch
+	--	{AuraID = 351872, UnitID = "player"},	-- 钢铁尖刺
+	--	{AuraID = 355316, UnitID = "player"},	-- 安海尔德之盾
+	--	{AuraID = 356326, UnitID = "player"},	-- 折磨洞察
+	--	{AuraID = 355333, UnitID = "player"},	-- 回收的聚变增幅器
 		-- 盟约
 		{AuraID = 331937, UnitID = "player", Flash = true},	-- 沉醉
 		{AuraID = 323546, UnitID = "player"},	-- 饕餮狂乱
@@ -114,6 +119,9 @@ local list = {
 		{AuraID = 339461, UnitID = "player"},	-- 猎手坚韧
 		{AuraID = 325381, UnitID = "player", Flash = true},	-- 争先打击
 		{AuraID = 342774, UnitID = "player"},	-- 繁华原野
+		{AuraID = 333218, UnitID = "player"},	-- 废土礼节
+		{AuraID = 336885, UnitID = "player"},	-- 抚慰阴影
+		{AuraID = 324156, UnitID = "player", Flash = true},	-- 劫掠射击
 		-- 炼金石
 		{AuraID = 60233, UnitID = "player"},	-- 敏捷
 		{AuraID = 60229, UnitID = "player"},	-- 力量
@@ -324,6 +332,7 @@ local list = {
 	["InternalCD"] = { -- 自定义内置冷却组
 		{IntID = 240447, Duration = 20},	-- 大米，践踏
 		{IntID = 114018, Duration = 15, OnSuccess = true, UnitID = "all"},	-- 帷幕
+		{IntID = 316958, Duration = 30, OnSuccess = true, UnitID = "all"},	-- 红土
 	},
 }
 
