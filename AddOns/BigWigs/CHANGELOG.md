@@ -1,18 +1,7 @@
 # BigWigs
 
-## [v222.1](https://github.com/BigWigsMods/BigWigs/tree/v222.1) (2021-05-27)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v222...v222.1) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v222.5](https://github.com/BigWigsMods/BigWigs/tree/v222.5) (2021-06-04)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v222.4...v222.5) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
-- bump version  
-- Options: Add more icons  
-- SanctumOfDomination/PainsmithRaznal: minor fix  
-- SanctumOfDomination/FatescribeRohKalo: Add Despair  
-- SanctumOfDomination/FatescribeRohKalo: Updates  
-- SanctumOfDomination/KelThuzad: More stage 1/3 initial timers  
-- SanctumOfDomination: Fix some stage icons  
-- SanctumOfDomination/SylvanasWindrunner: Add Intermission soon warning  
-- SanctumOfDomination/SylvanasWindrunner: initial drycode  
-- SanctumOfDomination/FatescribeRohKalo: remove unused variable  
-- SanctumOfDomination/FatescribeRohKalo: Adjust stage detection  
-- SanctumOfDomination/FatescribeRohKalo: Updates  
-- Core: Change implementation for generic boss options  
+- Loader: Disable the check on the minimap icon until it can be improved.  
+- SanctumOfDomination/SylvanasWindrunner: Stage 1 and Stage 2 updates  

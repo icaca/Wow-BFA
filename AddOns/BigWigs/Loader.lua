@@ -15,6 +15,8 @@ local bwFrame = CreateFrame("Frame")
 local ldb = LibStub("LibDataBroker-1.1")
 local ldbi = LibStub("LibDBIcon-1.0")
 
+local strfind = string.find
+
 -----------------------------------------------------------------------
 -- Generate our version variables
 --
@@ -34,7 +36,7 @@ do
 	local RELEASE = "RELEASE"
 
 	local releaseType = RELEASE
-	local myGitHash = "54ebe2e" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "532b0b2" -- The ZIP packager will replace this with the Git hash.
 	local releaseString = ""
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -42,7 +44,7 @@ do
 	--@end-alpha@]=]
 
 	-- If we find "@" then we're running from Git directly.
-	if myGitHash:find("@", nil, true) then
+	if strfind(myGitHash, "@", nil, true) then
 		myGitHash = "repo"
 		releaseType = REPO
 	end
@@ -86,6 +88,7 @@ local next, tonumber, type, strsplit = next, tonumber, type, strsplit
 local SendAddonMessage, Ambiguate, CTimerAfter, CTimerNewTicker = C_ChatInfo.SendAddonMessage, Ambiguate, C_Timer.After, C_Timer.NewTicker
 local GetInstanceInfo, GetBestMapForUnit, GetMapInfo = GetInstanceInfo, C_Map.GetBestMapForUnit, C_Map.GetMapInfo
 local UnitName, UnitGUID = UnitName, UnitGUID
+local debugstack = debugstack
 
 -- Try to grab unhooked copies of critical funcs (hooked by some crappy addons)
 public.GetBestMapForUnit = GetBestMapForUnit
@@ -420,7 +423,16 @@ local dataBroker = ldb:NewDataObject("BigWigs",
 
 function dataBroker.OnClick(self, button)
 	if button == "RightButton" then
-		loadCoreAndOpenOptions()
+		--local trace = debugstack(2)
+		--if strfind(trace, "LibDBIcon%-1%.0%.lua:%d+>\n?$") then
+			loadCoreAndOpenOptions()
+		--else
+		--	public.stack = trace
+		--	sysprint("|cFFff0000WARNING!|r")
+		--	sysprint("One of your addons was prevented from force loading the BigWigs options.")
+		--	sysprint("Contact us on the BigWigs Discord about this, it should not be happening.")
+		--	return
+		--end
 	end
 end
 
@@ -520,7 +532,7 @@ do
 					local slash = tbl[j]:trim():upper()
 					_G["SLASH_"..slash..1] = slash
 					SlashCmdList[slash] = function(text)
-						if name:find("BigWigs", nil, true) then
+						if strfind(name, "BigWigs", nil, true) then
 							-- Attempting to be smart. Only load core & config if it's a BW plugin.
 							loadAndEnableCore()
 							load(BigWigsOptions, "BigWigs_Options")
@@ -740,7 +752,7 @@ function mod:ADDON_LOADED(addon)
 		-- TODO: look into having a way for our boss modules not to create a table when no options are changed.
 		if BigWigs3DB.namespaces then
 			for k,v in next, BigWigs3DB.namespaces do
-				if k:find("BigWigs_Bosses_", nil, true) and not next(v) then
+				if strfind(k, "BigWigs_Bosses_", nil, true) and not next(v) then
 					BigWigs3DB.namespaces[k] = nil
 				end
 			end
@@ -1047,7 +1059,7 @@ do
 			--if BigWigs and BigWigs.db.profile.fakeDBMVersion or self.isFakingDBM then
 			--	-- If there are people with newer versions than us, suddenly we've upgraded!
 			--	local rev, dotRev = tonumber(revision), tonumber(DBMdotRevision)
-			--	if rev and displayVersion and rev ~= 99999 and rev > dotRev and not displayVersion:find("alpha", nil, true) then -- Failsafes
+			--	if rev and displayVersion and rev ~= 99999 and rev > dotRev and not strfind(displayVersion, "alpha", nil, true) then -- Failsafes
 			--		if not prevUpgradedUser then
 			--			prevUpgradedUser = sender
 			--		elseif prevUpgradedUser ~= sender then
@@ -1372,7 +1384,7 @@ do
 		if (BigWigs and BigWigs.db.profile.showZoneMessages == false) or self.isShowingZoneMessages == false then return end
 		local zoneAddon = public.zoneTbl[id]
 		if zoneAddon and zoneAddon ~= "BigWigs_Shadowlands" then
-			if zoneAddon:find("LittleWigs_", nil, true) then zoneAddon = "LittleWigs" end -- Collapse into one addon
+			if strfind(zoneAddon, "LittleWigs_", nil, true) then zoneAddon = "LittleWigs" end -- Collapse into one addon
 			if id > 0 and not fakeZones[id] and not warnedThisZone[id] and not IsAddOnEnabled(zoneAddon) then
 				warnedThisZone[id] = true
 				local msg = L.missingAddOn:format(zoneAddon)
@@ -1503,7 +1515,18 @@ end
 
 SLASH_BigWigs1 = "/bw"
 SLASH_BigWigs2 = "/bigwigs"
-SlashCmdList.BigWigs = loadCoreAndOpenOptions
+SlashCmdList.BigWigs = function()
+	local trace = debugstack(2)
+	if strfind(trace, "^%[string \"@Interface\\FrameXML\\ChatFrame%.lua") and not strfind(trace, "AddOns", nil, true) then
+		loadCoreAndOpenOptions()
+	else
+		public.stack = trace
+		sysprint("|cFFff0000WARNING!|r")
+		sysprint("One of your addons was prevented from force loading the BigWigs options.")
+		sysprint("Contact us on the BigWigs Discord about this, it should not be happening.")
+		return
+	end
+end
 
 SLASH_BigWigsVersion1 = "/bwv"
 SlashCmdList.BigWigsVersion = function()

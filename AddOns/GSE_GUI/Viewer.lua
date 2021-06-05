@@ -12,7 +12,7 @@ local editkey = ""
 
 
 local viewframe = AceGUI:Create("Frame")
-viewframe:SetTitle(L["Sequence Viewer"])
+viewframe:SetTitle(L["Sequence Editor"])
 -- viewframe.frame:SetBackdrop({
 --   bgFile="Interface\\Addons\\GSE_GUI\\GSE2_Logo_Dark_512.tga",
 --   edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",
@@ -22,6 +22,8 @@ viewframe:SetTitle(L["Sequence Viewer"])
 -- });
 
 GSE.GUIViewFrame = viewframe
+viewframe.Height = 500
+viewframe.Width = 700
 
 viewframe:Hide()
 local sequenceboxtext = AceGUI:Create("MultiLineEditBox")
@@ -342,8 +344,27 @@ function GSE.GUIViewerLayout(mcontainer)
 
   local scrollcontainer = AceGUI:Create("SimpleGroup")
   scrollcontainer:SetFullWidth(true)
-  scrollcontainer:SetHeight(370)
   scrollcontainer:SetLayout("Fill")
+  scrollcontainer:SetHeight(viewframe.Height - 130)
+
+  viewframe.frame:SetScript("OnSizeChanged", function(self, width, height)
+    viewframe.Height = height
+    viewframe.Width = width
+    if viewframe.Height > GetScreenHeight() then
+        viewframe.Height = GetScreenHeight() - 10
+        viewframe:SetHeight(viewframe.Height)
+    end
+    if viewframe.Height < 500 then
+        viewframe.Height = 500
+        viewframe:SetHeight(viewframe.Height)
+    end
+    if viewframe.Width < 700 then
+        viewframe.Width = 700
+        viewframe:SetWidth(viewframe.Width)
+    end
+    scrollcontainer:SetHeight(viewframe.Height - 130)
+    viewframe:DoLayout()
+  end)
 
 
   mcontainer:AddChild(scrollcontainer)
