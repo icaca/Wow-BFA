@@ -1,11 +1,10 @@
 # LittleWigs
 
-## [v9.0.34](https://github.com/BigWigsMods/LittleWigs/tree/v9.0.34) (2021-05-31)
-[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v9.0.33...v9.0.34) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
+## [v9.0.35](https://github.com/BigWigsMods/LittleWigs/tree/v9.0.35) (2021-06-07)
+[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v9.0.34...v9.0.35) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
 
 - Update option files  
-- Classic/Deadmines/Cookie: Rename module  
-- Update option files  
-- Shadowlands/DeOtherSide/Muehzala: Add Say countdown to Cosmic Artifice  
+- TBC/TheMechanar/Sepethrea: Fix bad copy paste  
+- TBC/TheMechanar: Sync some changes from BCC  
+- Shadowlands/SpiresOfAscension: Add trash module (#600)  
 - Update workflow  
-- TBC/TheMechanar/Sepethrea: Error fix, closes #596  
