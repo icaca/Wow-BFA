@@ -11,9 +11,9 @@ BigWigs:AddSounds("The Tarragrue", {
 	[347668] = {"alarm","alert"},
 	[347679] = {"info","long"},
 	[352368] = "info",
-	[352382] = "info",
-	[352389] = "info",
-	[352398] = "info",
+	[352382] = {"alarm","info"},
+	[352389] = {"alarm","info"},
+	[352398] = {"alarm","info"},
 })
 
 BigWigs:AddSounds("The Eye of the Jailer", {
