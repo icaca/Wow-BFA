@@ -61,7 +61,6 @@ BigWigs:AddColors("Remnant of Ner'zhul", {
 	[350388] = "blue",
 	[350469] = {"blue","orange","yellow"},
 	[350489] = "blue",
-	[350676] = "yellow",
 	[351066] = "cyan",
 	[355123] = "yellow",
 })
@@ -82,7 +81,6 @@ BigWigs:AddColors("Soulrender Dormazain", {
 BigWigs:AddColors("Painsmith Raznal", {
 	[348456] = {"blue","orange"},
 	[348508] = {"blue","yellow"},
-	[352052] = "red",
 	[355505] = {"blue","yellow"},
 	[355534] = "yellow",
 	[355568] = {"blue","yellow"},

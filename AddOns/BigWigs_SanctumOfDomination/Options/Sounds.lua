@@ -59,7 +59,6 @@ BigWigs:AddSounds("Remnant of Ner'zhul", {
 	[350388] = "info",
 	[350469] = "warning",
 	[350489] = "underyou",
-	[350676] = "alert",
 	[351066] = "long",
 	[355123] = "alert",
 })
@@ -77,7 +76,6 @@ BigWigs:AddSounds("Soulrender Dormazain", {
 BigWigs:AddSounds("Painsmith Raznal", {
 	[348456] = "warning",
 	[348508] = {"alert","warning"},
-	[352052] = "alarm",
 	[355505] = "warning",
 	[355534] = "alert",
 	[355568] = {"alert","warning"},
