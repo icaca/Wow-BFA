@@ -18,13 +18,14 @@ local alm
 
 --map IDs, format since Legion is XYABV, X = Expansion, Y = Raid number, ABV = Abbreviation
 local map_id_list = {
-	["81UDI"] = 1148, ["82BDZ"] = 1358, ["83COS"] = 1345, ["84ETP"] = 1512, ["85NYA"] = 1582, ["86CON"] = 1735
+	["86CON"] = 1735, ["87SOD"] = 2004
 }
 
-local raid_normal = {"81UDI", "82BDZ", "83COS", "84ETP", "85NYA", "86CON"}
-local raid_heroic = {"81UDI", "82BDZ", "83COS", "84ETP", "85NYA", "86CON"}
-local raid_lfr = {"81UDI", "82BDZ", "83COS", "84ETP", "85NYA", "86CON"}
-local raid_mythic = {"81UDI", "82BDZ", "83COS", "84ETP", "85NYA", "86CON"}
+local raid_normal = {"86CON", "87SOD"}
+local raid_heroic = {"86CON", "87SOD"}
+local raid_lfr = {"86CON", "87SOD"}
+local raid_mythic = {"86CON", "87SOD"}
+
 
 local function MakeList(raids)
 	local list = {}
@@ -151,51 +152,6 @@ function AutoLog:eventHandler(this, event, arg1, ...)
 					order = 3,
 					width = "full",
 				},
-				--guildRuns = { -- Only log guild runs
-					--	type = "toggle", name = L["Only log guild runs"], set = "SetGuildRun", get = "GetGuildRun", order = 3, width = "full",
-				--},
-				--[[
-					hideCat = {	-- Lich king raids
-					type = "toggle",
-					name = L["Hide Cataclysm raids"],
-					get = function() return AutoLog.db.global.hidecat end,
-					set = function(info, value) AutoLog.db.global.hidecat = value end,
-					order = 4,
-					width = "full",
-				},
-				hideMop = {	-- Pandaria raids
-					type = "toggle",
-					name = L["Hide Mists of Pandaria raids"],
-					get = function() return AutoLog.db.global.hidemop end,
-					set = function(info, value) AutoLog.db.global.hidemop = value end,
-					order = 5,
-					width = "full",
-				},
-				hideWod = {	-- Draenor raids
-					type = "toggle",
-					name = L["Hide Warlords of Draenor raids"],
-					get = function() return AutoLog.db.global.hidewod end,
-					set = function(info, value) AutoLog.db.global.hidewod = value end,
-					order = 6,
-					width = "full",
-				},
-				hideLeg = { -- Legion raids
-					type = "toggle",
-					name = L["Hide Legion raids"],
-					get = function() return AutoLog.db.global.hideleg end,
-					set = function(info, value) AutoLog.db.global.hideleg = value end,
-					order = 7,
-					width = "full",
-				},
-				]]--
-				osw = { -- on screen warning
-					type = "toggle",
-					name = L["Show combat log status on screen"],
-					get = function() return AutoLog.db.global.osw end,
-					set = function(info, value) AutoLog.db.global.osw = value end,
-					order = 8,
-					width = "full",
-				},
 				chatwarning = {
 					type = "toggle",
 					name = L["Display in chat"],
@@ -282,7 +238,7 @@ function AutoLog:eventHandler(this, event, arg1, ...)
 					get = function(info, raid) return AutoLog:GetSetting("lfr", raid) end,
 					set = function(info, raid, value) AutoLog:SetSetting("lfr", raid, value) end,
 					order = 18,
-				},
+				},				
 			},
 		}
 		AceConfig:RegisterOptionsTable("AutoLog", options)
@@ -348,23 +304,6 @@ function AutoLog:GetKey()
 		return rk
 	end
 end
-
--- old GetKey function
---function AutoLog:GetKey()
---	local k, v
---	local rk = false
---	local mid = GetCurrentMapAreaID()
---	if checkFOD(mid) then rk = "43DGS"	
---	else
---		for k, v in pairs (map_id_list) do
---			if v == mid then
---				rk = k
---				break
---			end
---		end
---	end
---	return rk
---end
 
 function AutoLog:IsInRaid()
 	local isInstance, instanceType = IsInInstance()
@@ -468,24 +407,6 @@ end
 function AutoLog:GetSetting(settingtype, raid) return AutoLog.db.global[settingtype][raid] end
 function AutoLog:SetSetting(settingtype, raid, settingvalue) AutoLog.db.global[settingtype][raid] = settingvalue; AutoLog:CheckLog() end
 function AutoLog:ToggleLog() AutoLog:SetLogging(true) end
-
---untested code
---[[
-function AutoLog:SetGuildRun(info, val)
-	AutoLog.db.global.guildrun = val
-	
-	if val then
-		AutoLog:RegisterEvent("GUILD_PARTY_STATE_UPDATED")
-		AutoLog:GUILD_PARTY_STATE_UPDATED()
-	else
-		AutoLog:UnregisterEvent("GUILD_PARTY_STATE_UPDATED")
-	end
-	
-	AutoLog:CheckLog()
-end
-
-function AutoLog:GetGuildRun() return AutoLog.db.global.guildrun end
-]]--
 
 StaticPopupDialogs.AUTOLOG_WARNING = {
 	text = L["AutoLog's settings have changed from character based to account based. Please check your settings now."],
