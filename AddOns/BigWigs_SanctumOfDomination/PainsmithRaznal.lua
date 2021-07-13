@@ -98,13 +98,9 @@ function mod:OnEngage()
 	self:SetStage(1)
 
 	self:CDBar(355505, 8, CL.count:format(L.chains, chainsCount)) -- Shadowsteel Chains
-	if self:Mythic() then
-		self:CDBar(355568, 12, CL.count:format(L.axe, instrumentCount)) -- Axe
-	else
-		self:CDBar(348508, 17, CL.count:format(L.hammer, instrumentCount)) -- Hammer
-	end
-	self:CDBar(352052, self:Mythic() and 26.8 or 33, CL.count:format(self:SpellName(352052), spikedBallsCount)) -- Spiked Balls
-	self:CDBar(348456, self:Mythic() and 42 or 49, CL.count:format(CL.traps, trapsCount)) -- Flameclasp Trap
+	self:CDBar(355568, self:Mythic() and 12 or 18.1, CL.count:format(L.axe, instrumentCount)) -- Axe
+	self:CDBar(352052, self:Mythic() and 26.8 or 24, CL.count:format(self:SpellName(352052), spikedBallsCount)) -- Spiked Balls
+	self:CDBar(348456, self:Mythic() and 42 or 45, CL.count:format(CL.traps, trapsCount)) -- Flameclasp Trap
 
 	self:RegisterUnitEvent("UNIT_HEALTH", nil, "boss1")
 end
@@ -137,7 +133,7 @@ function mod:InstrumentApplied(args)
 	end
 	self:TargetBar(args.spellId, 6, args.destName, CL.count:format(equippedWeapon, instrumentCount))
 	instrumentCount = instrumentCount + 1
-	self:Bar(args.spellId, args.spellId == 355568 and 17 or 32.9, CL.count:format(equippedWeapon, instrumentCount))
+	self:Bar(args.spellId, 19.5, CL.count:format(equippedWeapon, instrumentCount))
 end
 
 function mod:InstrumentRemoved(args)
@@ -149,37 +145,11 @@ function mod:InstrumentRemoved(args)
 end
 
 function mod:UNIT_SPELLCAST_SUCCEEDED(_, _, _, spellId)
-	if spellId == 348460 then -- Flameclasp Trap
-		--self:Message(348456, "orange", CL.count:format(CL.traps, trapsCount))
-		--trapsCount = trapsCount + 1
-		--self:Bar(348456, 41, CL.count:format(CL.traps, trapsCount))
-	elseif spellId == 352052 then -- Spiked Balls
+	if spellId == 352052 then -- Spiked Balls
 		self:Message(spellId, "red", CL.count:format(self:SpellName(spellId), spikedBallsCount))
 		self:PlaySound(spellId, "alarm")
 		spikedBallsCount = spikedBallsCount + 1
-		if self:GetStage() == 1 then
-			-- XXX Need the heroic time
-			self:Bar(spellId, self:Mythic() and 48.7 or 62, CL.count:format(self:SpellName(spellId), spikedBallsCount))
-		else
-			-- 57.3, 52.3, ?
-			self:Bar(spellId, self:Mythic() and (spikedBallsCount-1 == 1 and 57 or 52) or 62, CL.count:format(self:SpellName(spellId), spikedBallsCount))
-		end
-	elseif spellId == 348508 or spellId == 355568 or spellId == 355778 then -- Hurl weapons
-		-- Target snapshots here, SPELL_CAST_START is too late
-		--local name = self:UnitName("boss1target")
-		--local equippedWeapon = L[weaponNames[spellId]]
-		--self:TargetMessage(spellId, "yellow", name, CL.count(equippedWeapon, instrumentCount))
-		--self:PrimaryIcon(spellId, name)
-		--self:ScheduleTimer("PrimaryIcon", 6, spellId)
-		--if self:Me(self:UnitGUID("boss1target")) then
-		--	-- Let UNIT_AURA do this, I guess? It's 6s from here to damage,
-		--	-- so the aura should be applied about now
-		--else
-		--	self:PlaySound(spellId, "alert")
-		--end
-		--self:TargetBar(spellId, 6, name, CL.count:format(equippedWeapon, instrumentCount))
-		--instrumentCount = instrumentCount + 1
-		--self:Bar(spellId, 33, CL.count:format(equippedWeapon, instrumentCount))
+		self:Bar(spellId, 41.4, CL.count:format(self:SpellName(spellId), spikedBallsCount))
 	end
 end
 
@@ -199,7 +169,7 @@ do
 	function mod:FlameclaspTrap(args)
 		playerList = {}
 		trapsCount = trapsCount + 1
-		self:Bar(args.spellId, 48, CL.count:format(CL.traps, trapsCount))
+		self:Bar(args.spellId, 40, CL.count:format(CL.traps, trapsCount))
 	end
 
 	function mod:FlameclaspTrapApplied(args)
@@ -209,7 +179,7 @@ do
 		if self:Me(args.destGUID) then
 			self:Say(args.spellId, CL.rticon:format(L.trap, mark))
 			self:SayCountdown(args.spellId, 5, mark)
-			self:PlaySound(args.spellId, "warning")
+			self:PlaySound(args.spellId, "alert")
 		end
 		self:NewTargetsMessage(args.spellId, "orange", playerList, nil, CL.count:format(CL.traps, trapsCount-1))
 		self:CustomIcon(flameclaspTrapMarker, args.destName, mark)
@@ -232,14 +202,14 @@ do
 			prev = t
 			playerList = {}
 			chainsCount = chainsCount + 1
-			self:Bar(args.spellId, 30.6, CL.count:format(L.chains, chainsCount))
+			self:Bar(args.spellId, 40.3, CL.count:format(L.chains, chainsCount))
 		end
 		local count = #playerList+1
 		playerList[count] = args.destName
 		playerList[args.destName] = count -- Set raid marker
 		if self:Me(args.destGUID) then
-			self:Say(args.spellId)
-			self:SayCountdown(args.spellId, 4)
+			self:Say(args.spellId, CL.rticon:format(L.chains, count))
+			self:SayCountdown(args.spellId, 3, count, 2) -- XXX workaround timer going negative
 			self:PlaySound(args.spellId, "warning")
 		end
 		self:NewTargetsMessage(args.spellId, "yellow", playerList, nil, CL.count:format(L.chains, chainsCount-1))
@@ -259,12 +229,17 @@ end
 
 do
 	local emberCount = 0
-	function mod:ShadowsteelEmber(args)
-		self:Message(355534, "yellow", CL.count:format(L.ember, emberCount))
-		self:PlaySound(355534, "alert")
+	function mod:ShadowsteelEmber()
+		if self:Mythic() then
+			self:Message(355534, "yellow", CL.count:format(L.ember, emberCount))
+			self:PlaySound(355534, "alert")
+		end
 		emberCount = emberCount + 1
-		if emberCount < 10 then
+		if emberCount < 9 then
 			self:Bar(355534, 5, CL.count:format(L.ember, emberCount))
+			if not self:Mythic() then
+				self:ScheduleTimer("ShadowsteelEmber", 5)
+			end
 		end
 	end
 
@@ -279,9 +254,12 @@ do
 		self:PlaySound("stages", "info")
 
 		emberCount = 1
-		self:Bar(355534, 8, CL.count:format(L.ember, emberCount))
+		self:Bar(355534, 2, CL.count:format(L.ember, emberCount))
+		if not self:Mythic() then
+			self:ScheduleTimer("ShadowsteelEmber", 2)
+		end
 
-		self:Bar("stages", 51.8, CL.intermission, args.spellId) -- 45s Forge Weapon + 6.8s to jump down
+		self:Bar("stages", 41.8, CL.intermission, args.spellId) -- 35s Forge Weapon + 6.8s to jump down
 	end
 
 	function mod:ForgeWeaponOver(args)
@@ -291,10 +269,10 @@ do
 		self:PlaySound("stages", "long")
 
 		self:Bar(355505, 15, CL.count:format(L.chains, chainsCount)) -- Shadowsteel Chains
-		-- Heroic: Hammer -> Axe -> Scythe / Mythic: Axe -> Hammer -> Scythe
-		local spellId = self:GetStage() == 3 and 355778 or self:Mythic() and 348508 or 355568
-		self:Bar(spellId, 24, CL.count:format(L[weaponNames[spellId]], instrumentCount)) -- Instruments of Pain
-		self:Bar(352052, self:Mythic() and 6.8 or 40, CL.count:format(self:SpellName(352052), spikedBallsCount)) -- Spiked Balls
-		self:Bar(348456, self:Mythic() and 51.8 or 56, CL.count:format(CL.traps, trapsCount)) -- Flameclasp Trap
+		-- Axe -> Hammer -> Scythe
+		local spellId = self:GetStage() == 3 and 355778 or 348508
+		self:Bar(spellId, 17, CL.count:format(L[weaponNames[spellId]], instrumentCount)) -- Instruments of Pain
+		self:Bar(352052, self:Mythic() and 6.8 or 24, CL.count:format(self:SpellName(352052), spikedBallsCount)) -- Spiked Balls
+		self:Bar(348456, self:Mythic() and 51.8 or 36, CL.count:format(CL.traps, trapsCount)) -- Flameclasp Trap
 	end
 end
